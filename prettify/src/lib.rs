@@ -1,9 +1,9 @@
 pub use doc::*;
-use helper::print_doc_helper;
+use helpers::print_doc_helper;
 
 mod command;
 mod doc;
-mod helper;
+mod helpers;
 
 pub const PRETTIFY_DEFAULT_CONFIG: PrettifyConfig = PrettifyConfig { tab_width: 4 };
 

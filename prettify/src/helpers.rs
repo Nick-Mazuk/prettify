@@ -1,6 +1,11 @@
 use crate::command::print_command;
 use crate::{Doc, PrettifyConfig};
 
+#[derive(PartialEq, Debug, Clone, Copy)]
+pub struct Context {
+    indent_level: usize,
+}
+
 pub fn print_doc_helper(doc: &Doc, output: &mut String, options: &PrettifyConfig) {
     match doc {
         Doc::Command(command) => print_command(command, output, options),

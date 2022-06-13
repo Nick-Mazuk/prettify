@@ -1,6 +1,6 @@
 #[derive(PartialEq, Debug, Clone)]
 pub enum DocCommand<'a> {
-    // Group,
+    Group(Box<Doc<'a>>),
     // ConditionalGroup,
     // Fill,
     // IfBreak,

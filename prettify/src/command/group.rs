@@ -3,12 +3,7 @@ use crate::{Doc, PrettifyConfig};
 use std::boxed::Box;
 use std::vec::Vec;
 
-pub fn print_join(
-    separator: &Box<Doc>,
-    docs: &Vec<Doc>,
-    output: &mut String,
-    options: &PrettifyConfig,
-) {
+pub fn print_group(doc: &Box<Doc>, output: &mut String, options: &PrettifyConfig) {
     match **separator {
         Doc::String(separator) => {
             for (index, doc) in docs.iter().enumerate() {
