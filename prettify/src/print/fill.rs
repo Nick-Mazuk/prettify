@@ -1,6 +1,7 @@
 use super::fits::fits;
-use super::shared::{Command, Indent, Mode, PRINT_WIDTH};
-use crate::{Doc, DocCommand, DocOptions};
+use super::shared::{Command, Indent, LineSuffixes, Mode, PRINT_WIDTH};
+use crate::{Doc, DocOptions};
+use std::borrow::Cow;
 
 // Fills each line with as much code as possible before moving to a new
 // line with the same indentation.
@@ -24,21 +25,20 @@ use crate::{Doc, DocCommand, DocOptions};
 //   -> output the first content item and the whitespace with "break".
 pub fn process_fill<'a>(
     commands: &mut Vec<Command<'a>>,
-    contents: &'a Vec<Doc<'a>>,
+    contents: Vec<Cow<'a, Doc<'a>>>,
     indent: &Indent,
     pos: &usize,
-    line_suffixes: &Vec<String>,
+    line_suffixes: &LineSuffixes<'a>,
     doc_options: &DocOptions,
     mode: &Mode,
-    doc: &'a mut Doc<'a>,
 ) {
     let remainder = PRINT_WIDTH - pos;
     if contents.len() == 0 {
         return ();
     }
-    let content = &mut contents[0];
-    let contents_command_flat = (indent.clone(), Mode::Flat, content);
-    let contents_command_break = (indent.clone(), Mode::Break, content);
+    let content = &contents[0];
+    let contents_command_flat: Command = (indent.clone(), Mode::Flat, content.clone());
+    let contents_command_break: Command = (indent.clone(), Mode::Break, content.clone());
     let content_fits = fits(
         &contents_command_flat,
         &Vec::new(),
@@ -56,9 +56,9 @@ pub fn process_fill<'a>(
         return ();
     }
 
-    let whitespace = &mut contents[1];
-    let whitespace_command_flat = (indent.clone(), Mode::Flat, whitespace);
-    let whitespace_command_break = (indent.clone(), Mode::Break, whitespace);
+    let whitespace = &contents[1];
+    let whitespace_command_flat: Command = (indent.clone(), Mode::Flat, whitespace.clone());
+    let whitespace_command_break: Command = (indent.clone(), Mode::Break, whitespace.clone());
 
     if contents.len() == 2 {
         if content_fits {
@@ -71,21 +71,19 @@ pub fn process_fill<'a>(
         return ();
     }
 
-    // At this point we've handled the first pair (context, separator)
-    // and will create a new fill doc for the rest of the content.
-    // Ideally we wouldn't mutate the array here but copying all the
-    // elements to a new array would make this algorithm quadratic,
-    // which is unusable for large arrays (e.g. large texts in JSX).
-    let original_contents_ref = match doc {
-        Doc::Command(DocCommand::Fill(ref mut original_contents, _)) => Some(original_contents),
-        _ => None,
-    }
-    .unwrap();
-    original_contents_ref.remove(0);
-    original_contents_ref.remove(0);
-    let second_content = &mut original_contents_ref[0].clone();
-    let mut remaining_command: Command = (indent.clone(), *mode, doc);
-    let mut first_and_second_content_flat_command = (indent.clone(), Mode::Flat, second_content);
+    let mut cloned_contents = contents.clone();
+    cloned_contents.remove(0);
+    cloned_contents.remove(0);
+    let remaining_command: Command = (
+        indent.clone(),
+        *mode,
+        Cow::Owned(Doc::Children(cloned_contents.clone())),
+    );
+    let first_and_second_content_flat_command: Command = (
+        indent.clone(),
+        Mode::Flat,
+        Cow::Owned(Doc::Children(cloned_contents)),
+    );
     let first_and_second_content_fits = fits(
         &first_and_second_content_flat_command,
         &Vec::new(),

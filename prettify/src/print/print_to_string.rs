@@ -1,5 +1,5 @@
 use super::align::make_align;
-// use super::fill::process_fill;
+use super::fill::process_fill;
 use super::group::process_group;
 use super::indent::make_indent;
 use super::shared::{Command, Indent, LineSuffixes, Mode};
@@ -69,18 +69,18 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         &mut pos,
                         &mut should_remeasure,
                     );
-                } // DocCommand::Fill(contents, doc_options) => {
-                //     process_fill(
-                //         &mut commands,
-                //         contents,
-                //         &indent,
-                //         &pos,
-                //         &line_suffixes,
-                //         doc_options,
-                //         &mode,
-                //         &mut doc,
-                //     );
-                // }
+                }
+                DocCommand::Fill(contents, doc_options) => {
+                    process_fill(
+                        &mut commands,
+                        contents,
+                        &indent,
+                        &pos,
+                        &line_suffixes,
+                        &doc_options,
+                        &mode,
+                    );
+                }
                 DocCommand::LineSuffix(contents) => {
                     line_suffixes.push(contents);
                 }

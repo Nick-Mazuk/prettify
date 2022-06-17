@@ -4,7 +4,7 @@ use std::borrow::Cow;
 pub enum DocCommand<'a> {
     Group(Box<Cow<'a, Doc<'a>>>, Cow<'a, DocOptions<'a>>),
     // ConditionalGroup,
-    // Fill(Vec<Doc<'a>>, DocOptions<'a>),
+    Fill(Vec<Cow<'a, Doc<'a>>>, DocOptions<'a>),
     // IfBreak,
     // BreakParent,
     // Join(Box<Doc<'a>>, Vec<Doc<'a>>),
