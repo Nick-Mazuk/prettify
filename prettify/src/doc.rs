@@ -6,12 +6,14 @@ pub enum DocCommand<'a> {
     // IfBreak,
     // BreakParent,
     // Join(Box<Doc<'a>>, Vec<Doc<'a>>),
-    // Line,
+
+    // Line(hard)
+    Line(bool),
     // SoftLine,
     // HardLine,
     // LiteralLine,
     LineSuffix(&'a str),
-    // LineSuffixBoundary,
+    LineSuffixBoundary,
     // Indent(contents)
     Indent(Box<Doc<'a>>),
     // Dedent,

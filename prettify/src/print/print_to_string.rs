@@ -23,6 +23,7 @@ pub fn print_to_string<'a>(doc: &'a Doc<'a>, config: &PrettifyConfig) -> String 
     let mut line_suffixes: LineSuffixes<'a> = vec![];
     let mut group_mode_map = HashMap::new();
     let mut commands: Vec<Command> = vec![(root_indent(), Mode::Break, doc)];
+    let line_hard_command = Doc::Command(DocCommand::Line(true));
 
     while commands.len() > 0 {
         let (indent, mode, doc) = commands.pop().unwrap();
@@ -73,6 +74,9 @@ pub fn print_to_string<'a>(doc: &'a Doc<'a>, config: &PrettifyConfig) -> String 
                 // }
                 DocCommand::LineSuffix(contents) => {
                     line_suffixes.push(contents);
+                }
+                DocCommand::LineSuffixBoundary => {
+                    commands.push((indent, mode, Doc::Command(DocCommand::Line(true))))
                 }
             },
         }
