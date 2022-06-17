@@ -1,5 +1,5 @@
 use super::align::make_align;
-use super::fill::process_fill;
+// use super::fill::process_fill;
 use super::group::process_group;
 use super::indent::make_indent;
 use super::shared::{Command, Indent, Mode};
@@ -16,13 +16,13 @@ fn root_indent() -> Indent {
     }
 }
 
-pub fn print_to_string<'a>(doc: &mut Doc<'a>, config: &PrettifyConfig) -> String {
+pub fn print_to_string(doc: &mut Doc, config: &PrettifyConfig) -> String {
     let mut pos: usize = 0;
     let mut should_remeasure = false;
     let mut out: Vec<String> = vec![];
     let mut line_suffixes: Vec<String> = vec![];
     let mut group_mode_map = HashMap::new();
-    let mut commands: Vec<Command<'a>> = vec![(root_indent(), Mode::Break, doc)];
+    let mut commands: Vec<Command> = vec![(root_indent(), Mode::Break, doc)];
 
     while commands.len() > 0 {
         let (indent, mode, doc) = commands.pop().unwrap();
@@ -59,19 +59,18 @@ pub fn print_to_string<'a>(doc: &mut Doc<'a>, config: &PrettifyConfig) -> String
                         &mut pos,
                         &mut should_remeasure,
                     );
-                }
-                DocCommand::Fill(contents, doc_options) => {
-                    process_fill(
-                        &mut commands,
-                        contents,
-                        &indent,
-                        &pos,
-                        &line_suffixes,
-                        doc_options,
-                        &mode,
-                        &mut doc,
-                    );
-                }
+                } // DocCommand::Fill(contents, doc_options) => {
+                  //     process_fill(
+                  //         &mut commands,
+                  //         contents,
+                  //         &indent,
+                  //         &pos,
+                  //         &line_suffixes,
+                  //         doc_options,
+                  //         &mode,
+                  //         &mut doc,
+                  //     );
+                  // }
             },
         }
     }

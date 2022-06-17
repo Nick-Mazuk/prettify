@@ -2,7 +2,7 @@
 pub enum DocCommand<'a> {
     Group(Box<Doc<'a>>, DocOptions<'a>),
     // ConditionalGroup,
-    Fill(Vec<Doc<'a>>, DocOptions<'a>),
+    // Fill(Vec<Doc<'a>>, DocOptions<'a>),
     // IfBreak,
     // BreakParent,
     // Join(Box<Doc<'a>>, Vec<Doc<'a>>),

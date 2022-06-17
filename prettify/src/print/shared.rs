@@ -25,4 +25,4 @@ pub enum Mode {
     Flat,
 }
 
-pub type Command<'a> = (Indent, Mode, &'a mut Doc<'a>);
+pub type Command<'a> = (Indent, Mode, &'a Doc<'a>);
