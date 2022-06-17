@@ -2,7 +2,7 @@ use super::align::make_align;
 // use super::fill::process_fill;
 use super::group::process_group;
 use super::indent::make_indent;
-use super::shared::{Command, Indent, Mode};
+use super::shared::{Command, Indent, LineSuffixes, Mode};
 use super::trim::trim;
 use crate::{Doc, DocCommand, PrettifyConfig};
 use std::collections::HashMap;
@@ -16,11 +16,11 @@ fn root_indent() -> Indent {
     }
 }
 
-pub fn print_to_string(doc: &mut Doc, config: &PrettifyConfig) -> String {
+pub fn print_to_string<'a>(doc: &'a Doc<'a>, config: &PrettifyConfig) -> String {
     let mut pos: usize = 0;
     let mut should_remeasure = false;
     let mut out: Vec<String> = vec![];
-    let mut line_suffixes: Vec<String> = vec![];
+    let mut line_suffixes: LineSuffixes<'a> = vec![];
     let mut group_mode_map = HashMap::new();
     let mut commands: Vec<Command> = vec![(root_indent(), Mode::Break, doc)];
 
@@ -60,17 +60,20 @@ pub fn print_to_string(doc: &mut Doc, config: &PrettifyConfig) -> String {
                         &mut should_remeasure,
                     );
                 } // DocCommand::Fill(contents, doc_options) => {
-                  //     process_fill(
-                  //         &mut commands,
-                  //         contents,
-                  //         &indent,
-                  //         &pos,
-                  //         &line_suffixes,
-                  //         doc_options,
-                  //         &mode,
-                  //         &mut doc,
-                  //     );
-                  // }
+                //     process_fill(
+                //         &mut commands,
+                //         contents,
+                //         &indent,
+                //         &pos,
+                //         &line_suffixes,
+                //         doc_options,
+                //         &mode,
+                //         &mut doc,
+                //     );
+                // }
+                DocCommand::LineSuffix(contents) => {
+                    line_suffixes.push(contents);
+                }
             },
         }
     }

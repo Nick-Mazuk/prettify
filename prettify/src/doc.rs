@@ -10,7 +10,7 @@ pub enum DocCommand<'a> {
     // SoftLine,
     // HardLine,
     // LiteralLine,
-    // LineSuffix,
+    LineSuffix(&'a str),
     // LineSuffixBoundary,
     // Indent(contents)
     Indent(Box<Doc<'a>>),

@@ -1,5 +1,5 @@
 use super::fits::fits;
-use super::shared::{Command, Indent, Mode, PRINT_WIDTH};
+use super::shared::{Command, Indent, LineSuffixes, Mode, PRINT_WIDTH};
 use crate::{Doc, DocOptions};
 use std::collections::HashMap;
 
@@ -7,7 +7,7 @@ pub fn process_group<'a>(
     contents: &'a std::boxed::Box<Doc<'a>>,
     doc_options: &DocOptions<'a>,
     commands: &mut Vec<Command<'a>>,
-    line_suffixes: &mut Vec<String>,
+    line_suffixes: &mut LineSuffixes<'a>,
     indent: Indent,
     mode: &Mode,
     group_mode_map: &mut HashMap<&'a str, Mode>,
