@@ -1,6 +1,8 @@
+use std::borrow::Cow;
+
 #[derive(PartialEq, Debug, Clone)]
 pub enum DocCommand<'a> {
-    Group(Box<Doc<'a>>, DocOptions<'a>),
+    Group(Box<Cow<'a, Doc<'a>>>, Cow<'a, DocOptions<'a>>),
     // ConditionalGroup,
     // Fill(Vec<Doc<'a>>, DocOptions<'a>),
     // IfBreak,
@@ -15,10 +17,10 @@ pub enum DocCommand<'a> {
     LineSuffix(&'a str),
     LineSuffixBoundary,
     // Indent(contents)
-    Indent(Box<Doc<'a>>),
+    Indent(Box<Cow<'a, Doc<'a>>>),
     // Dedent,
     // Align(width, contents)
-    Align(usize, Box<Doc<'a>>),
+    Align(usize, Box<Cow<'a, Doc<'a>>>),
     // MarkAsRoot,
     // DedentAsRoot,
     Trim,
@@ -36,7 +38,7 @@ pub struct DocOptions<'a> {
 #[derive(PartialEq, Debug, Clone)]
 pub enum Doc<'a> {
     String(&'a str),
-    Children(Vec<Doc<'a>>),
+    Children(Vec<Cow<'a, Doc<'a>>>),
     Command(DocCommand<'a>),
 }
 

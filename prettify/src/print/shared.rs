@@ -1,4 +1,5 @@
 use crate::Doc;
+use std::borrow::Cow;
 
 pub const PRINT_WIDTH: usize = 80;
 pub const NEW_LINE: char = '\n';
@@ -25,5 +26,5 @@ pub enum Mode {
     Flat,
 }
 
-pub type Command<'a> = (Indent, Mode, &'a Doc<'a>);
+pub type Command<'a> = (Indent, Mode, Cow<'a, Doc<'a>>);
 pub type LineSuffixes<'a> = Vec<&'a str>;
