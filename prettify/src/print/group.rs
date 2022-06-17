@@ -22,13 +22,13 @@ pub fn process_group<'a>(
             } else {
                 Mode::Flat
             },
-            &*contents,
+            &mut *contents,
         ));
     };
     *should_remeasure = false;
     let mut next_mode = Mode::Flat;
     // "&*" unboxes the contents and creates a reference of it
-    let next: Command = (indent.clone(), next_mode, &*contents);
+    let next: Command = (indent.clone(), next_mode, &mut *contents);
     let remainder = PRINT_WIDTH - *pos;
     let has_line_suffix = line_suffixes.len() > 0;
     if !doc_options.should_break
@@ -45,7 +45,7 @@ pub fn process_group<'a>(
     } else {
         *should_remeasure = true;
         next_mode = Mode::Break;
-        commands.push((indent, Mode::Break, &*contents));
+        commands.push((indent, Mode::Break, &mut *contents));
     }
     group_mode_map.insert(doc_options.id, next_mode);
 }
