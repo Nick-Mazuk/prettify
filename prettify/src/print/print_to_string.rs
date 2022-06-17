@@ -2,9 +2,10 @@ use super::align::make_align;
 use super::fill::process_fill;
 use super::group::process_group;
 use super::indent::make_indent;
-use super::shared::{Command, Indent, LineSuffixes, Mode};
+use super::line::process_line;
+use super::shared::{Command, Indent, LineSuffixes, Mode, Out};
 use super::trim::trim;
-use crate::{Doc, DocCommand, PrettifyConfig};
+use crate::{Doc, DocCommand, LineMode, PrettifyConfig};
 use std::borrow::Cow;
 use std::collections::HashMap;
 
@@ -17,7 +18,6 @@ fn root_indent() -> Indent {
     }
 }
 
-type Out = Vec<String>;
 type Commands<'a> = Vec<Command<'a>>;
 type GroupModeMap<'a> = std::collections::HashMap<&'a str, Mode>;
 
@@ -87,9 +87,11 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                 DocCommand::LineSuffixBoundary => commands.push((
                     indent,
                     mode,
-                    Cow::Owned(Doc::Command(DocCommand::Line(true))),
+                    Cow::Owned(Doc::Command(DocCommand::Line(LineMode::Hard))),
                 )),
-                DocCommand::Line(_) => {}
+                DocCommand::Line(line_mode) => {
+                    process_line(line_mode, &mode, &mut out, &mut pos, &mut should_remeasure)
+                }
             },
         }
     }

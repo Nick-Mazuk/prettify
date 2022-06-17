@@ -28,3 +28,4 @@ pub enum Mode {
 
 pub type Command<'a> = (Indent, Mode, Cow<'a, Doc<'a>>);
 pub type LineSuffixes<'a> = Vec<&'a str>;
+pub type Out = Vec<String>;

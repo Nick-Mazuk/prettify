@@ -3,6 +3,7 @@ mod fill;
 mod fits;
 mod group;
 mod indent;
+mod line;
 mod print_to_string;
 mod shared;
 mod trim;

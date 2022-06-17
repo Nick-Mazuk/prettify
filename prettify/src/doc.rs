@@ -1,6 +1,13 @@
 use std::borrow::Cow;
 
 #[derive(PartialEq, Debug, Clone)]
+pub enum LineMode {
+    Hard,
+    Soft,
+    Auto,
+}
+
+#[derive(PartialEq, Debug, Clone)]
 pub enum DocCommand<'a> {
     Group(Box<Cow<'a, Doc<'a>>>, Cow<'a, DocOptions<'a>>),
     // ConditionalGroup,
@@ -8,9 +15,7 @@ pub enum DocCommand<'a> {
     // IfBreak,
     // BreakParent,
     // Join(Box<Doc<'a>>, Vec<Doc<'a>>),
-
-    // Line(hard)
-    Line(bool),
+    Line(LineMode),
     // SoftLine,
     // HardLine,
     // LiteralLine,
