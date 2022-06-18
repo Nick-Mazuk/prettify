@@ -5,7 +5,7 @@ use super::indent::make_indent;
 use super::line::process_line;
 use super::shared::{Command, Indent, LineSuffixes, Mode, Out};
 use super::trim::trim;
-use crate::{AlignAmount, Doc, DocCommand, LineMode, PrettifyConfig};
+use crate::{Doc, DocCommand, LineMode, PrettifyConfig};
 use std::borrow::Cow;
 use std::collections::HashMap;
 
@@ -57,10 +57,10 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                 DocCommand::Trim => {
                     pos -= trim(&mut out);
                 }
-                DocCommand::Group(contents, doc_options) => {
+                DocCommand::Group(contents, options) => {
                     process_group(
                         *contents,
-                        doc_options,
+                        options,
                         &mut commands,
                         &mut line_suffixes,
                         indent,
