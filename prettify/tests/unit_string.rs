@@ -1,4 +1,4 @@
-use prettify::{concat, print, string};
+use prettify::{print, string};
 
 #[test]
 fn doc_string_1() {
