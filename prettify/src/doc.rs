@@ -20,7 +20,6 @@ pub enum DocCommand<'a> {
     Fill(Vec<Cow<'a, Doc<'a>>>, DocOptions<'a>),
     // IfBreak,
     // BreakParent,
-    // Join(Box<Doc<'a>>, Vec<Doc<'a>>),
     Line(LineMode),
     // SoftLine,
     // HardLine,
@@ -30,7 +29,6 @@ pub enum DocCommand<'a> {
     // Indent(contents)
     Indent(Box<Cow<'a, Doc<'a>>>),
     // Dedent,
-    // Align(width, contents)
     Align(Box<Cow<'a, Doc<'a>>>, AlignAmount),
     // MarkAsRoot,
     // DedentAsRoot,
