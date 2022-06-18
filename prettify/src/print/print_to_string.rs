@@ -43,7 +43,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                 pos += string.len();
             }
             Doc::Children(children) => {
-                for child in children {
+                for child in children.into_iter().rev() {
                     commands.push((indent.clone(), mode, child));
                 }
             }
