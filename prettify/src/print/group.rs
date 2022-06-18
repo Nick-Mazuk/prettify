@@ -31,11 +31,11 @@ pub fn process_group<'a>(
     // "&*" unboxes the contents and creates a reference of it
     let next: Command = (indent.clone(), next_mode, contents.clone());
     let remainder = PRINT_WIDTH - *pos;
-    let has_line_suffix = line_suffixes.len() > 0;
+    let has_line_suffix = !line_suffixes.is_empty();
     if !doc_options.should_break
         && fits(
             &next,
-            &commands,
+            commands,
             remainder,
             &doc_options,
             has_line_suffix,

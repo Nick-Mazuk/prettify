@@ -3,7 +3,7 @@ use super::shared::Command;
 
 pub fn fits(
     next: &Command,
-    commands: &Vec<Command>,
+    commands: &[Command],
     remainder: usize,
     doc_options: &DocOptions,
     has_line_suffix: bool,

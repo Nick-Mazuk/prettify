@@ -30,7 +30,7 @@ pub fn generate_indent(indent: Indent, new_indent: Indent, config: &PrettifyConf
             }
             Some(IndentKind::StringAlign(text)) => {
                 flush_spaces(&mut value, &mut length, &mut last_spaces);
-                value.push_str(&text);
+                value.push_str(text);
                 length += text.len();
             }
             Some(IndentKind::NumberAlign(width)) => {

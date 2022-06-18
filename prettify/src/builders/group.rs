@@ -1,7 +1,7 @@
 use super::super::doc::{Doc, DocCommand, DocOptions};
 use std::borrow::Cow;
 
-pub fn group<'a>(doc: Doc<'a>) -> Doc<'a> {
+pub fn group(doc: Doc) -> Doc {
     Doc::Command(DocCommand::Group(
         Box::new(Cow::Owned(doc)),
         Cow::Owned(DocOptions {

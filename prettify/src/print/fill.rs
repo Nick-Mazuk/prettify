@@ -33,8 +33,8 @@ pub fn process_fill<'a>(
     mode: &Mode,
 ) {
     let remainder = PRINT_WIDTH - pos;
-    if contents.len() == 0 {
-        return ();
+    if contents.is_empty() {
+        return;
     }
     let content = &contents[0];
     let contents_command_flat: Command = (indent.clone(), Mode::Flat, content.clone());
@@ -44,7 +44,7 @@ pub fn process_fill<'a>(
         &Vec::new(),
         remainder,
         doc_options,
-        line_suffixes.len() > 0,
+        !line_suffixes.is_empty(),
         true,
     );
     if contents.len() == 1 {
@@ -53,7 +53,7 @@ pub fn process_fill<'a>(
         } else {
             commands.push(contents_command_break);
         }
-        return ();
+        return;
     }
 
     let whitespace = &contents[1];
@@ -68,7 +68,7 @@ pub fn process_fill<'a>(
             commands.push(contents_command_break);
             commands.push(whitespace_command_break);
         }
-        return ();
+        return;
     }
 
     let mut cloned_contents = contents.clone();
@@ -89,7 +89,7 @@ pub fn process_fill<'a>(
         &Vec::new(),
         remainder,
         doc_options,
-        line_suffixes.len() > 0,
+        !line_suffixes.is_empty(),
         true,
     );
 

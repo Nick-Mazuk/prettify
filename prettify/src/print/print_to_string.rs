@@ -29,7 +29,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
     let mut group_mode_map: GroupModeMap = HashMap::new();
     let mut commands: Commands = vec![(root_indent(), Mode::Break, Cow::Owned(doc))];
 
-    while commands.len() > 0 {
+    while !commands.is_empty() {
         let (indent, mode, doc) = commands.pop().unwrap();
 
         let owned_doc = match doc {

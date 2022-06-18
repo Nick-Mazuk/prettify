@@ -1,5 +1,5 @@
 use super::super::doc::Doc;
 
-pub fn string<'a>(str: &'a str) -> Doc<'a> {
+pub fn string(str: &str) -> Doc {
     Doc::String(str)
 }
