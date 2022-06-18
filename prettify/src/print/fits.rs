@@ -1,5 +1,5 @@
+use super::super::doc::DocOptions;
 use super::shared::Command;
-use crate::DocOptions;
 
 pub fn fits(
     next: &Command,

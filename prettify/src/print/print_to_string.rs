@@ -1,3 +1,4 @@
+use super::super::doc::{Doc, DocCommand, LineMode, PrettifyConfig};
 use super::align::make_align;
 use super::fill::process_fill;
 use super::group::process_group;
@@ -5,7 +6,6 @@ use super::indent::make_indent;
 use super::line::process_line;
 use super::shared::{Command, Indent, LineSuffixes, Mode, Out};
 use super::trim::trim;
-use crate::{Doc, DocCommand, LineMode, PrettifyConfig};
 use std::borrow::Cow;
 use std::collections::HashMap;
 

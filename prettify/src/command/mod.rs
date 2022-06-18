@@ -1,4 +1,4 @@
-use crate::{DocCommand, PrettifyConfig};
+use super::super::doc::{DocCommand, PrettifyConfig};
 
 mod group;
 mod hardline;

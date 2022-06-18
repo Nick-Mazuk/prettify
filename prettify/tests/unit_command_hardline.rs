@@ -1,4 +1,4 @@
-use prettify::{print, Doc, DocCommand};
+// use prettify::print;
 
 #[test]
 fn command_hardline() {

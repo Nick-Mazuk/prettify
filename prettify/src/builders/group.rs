@@ -1,4 +1,4 @@
-use crate::{Doc, DocCommand, DocOptions};
+use super::super::doc::{Doc, DocCommand, DocOptions};
 use std::borrow::Cow;
 
 pub fn group<'a>(doc: Doc<'a>) -> Doc<'a> {

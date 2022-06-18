@@ -1,5 +1,5 @@
+use super::super::doc::LineMode;
 use super::shared::{Mode, Out};
-use crate::LineMode;
 
 pub fn process_line(
     line_mode: LineMode,

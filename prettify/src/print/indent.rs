@@ -1,5 +1,5 @@
+use super::super::doc::PrettifyConfig;
 use super::shared::{Indent, IndentKind};
-use crate::PrettifyConfig;
 
 pub fn make_indent(indent: Indent, config: &PrettifyConfig) -> Indent {
     generate_indent(

@@ -1,6 +1,7 @@
 extern crate regex;
 pub use builders::*;
-pub use doc::*;
+use doc::{Doc, PrettifyConfig};
+// pub use doc::*;
 // use helpers::print_doc_helper;
 
 // mod command;

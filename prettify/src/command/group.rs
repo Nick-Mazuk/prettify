@@ -1,5 +1,5 @@
-use crate::helpers::print_doc_helper;
-use crate::{Doc, PrettifyConfig};
+use super::super::doc::helpers::print_doc_helper;
+use super::super::doc::{Doc, PrettifyConfig};
 use std::boxed::Box;
 use std::vec::Vec;
 

@@ -1,6 +1,6 @@
+use super::super::doc::{AlignAmount, PrettifyConfig};
 use super::indent::generate_indent;
 use super::shared::{Indent, IndentKind};
-use crate::{AlignAmount, PrettifyConfig};
 
 // This version of the method contains many simplifications from the original that
 // might prove useful later. The following URL links to the original implementation:

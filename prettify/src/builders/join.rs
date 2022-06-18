@@ -1,4 +1,4 @@
-use crate::Doc;
+use super::super::doc::Doc;
 use std::borrow::Cow;
 
 pub fn join<'a>(docs: Vec<Doc<'a>>, separator: Doc<'a>) -> Doc<'a> {

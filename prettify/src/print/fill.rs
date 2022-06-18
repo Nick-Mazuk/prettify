@@ -1,6 +1,6 @@
+use super::super::doc::{Doc, DocOptions};
 use super::fits::fits;
 use super::shared::{Command, Indent, LineSuffixes, Mode, PRINT_WIDTH};
-use crate::{Doc, DocOptions};
 use std::borrow::Cow;
 
 // Fills each line with as much code as possible before moving to a new

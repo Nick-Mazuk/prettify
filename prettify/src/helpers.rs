@@ -1,5 +1,5 @@
-// use crate::command::print_command;
-// use crate::{Doc, PrettifyConfig};
+// use super::super::doc::command::print_command;
+// use super::super::doc::{Doc, PrettifyConfig};
 
 // #[derive(PartialEq, Debug, Clone, Copy)]
 // pub struct Context {

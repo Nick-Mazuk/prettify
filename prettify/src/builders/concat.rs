@@ -1,4 +1,4 @@
-use crate::Doc;
+use super::super::doc::Doc;
 use std::borrow::Cow;
 
 pub fn concat<'a>(docs: Vec<Doc<'a>>) -> Doc<'a> {

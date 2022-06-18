@@ -1,4 +1,4 @@
-use crate::{AlignAmount, Doc, DocCommand};
+use super::super::doc::{AlignAmount, Doc, DocCommand};
 use std::borrow::Cow;
 
 pub fn align<'a>(contents: Doc<'a>, amount: AlignAmount) -> Doc<'a> {

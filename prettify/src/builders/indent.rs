@@ -1,4 +1,4 @@
-use crate::{Doc, DocCommand};
+use super::super::doc::{Doc, DocCommand};
 use std::borrow::Cow;
 
 pub fn indent<'a>(doc: Doc<'a>) -> Doc<'a> {
