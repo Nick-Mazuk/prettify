@@ -1,8 +1,10 @@
 extern crate regex;
+pub use builders::*;
 pub use doc::*;
 // use helpers::print_doc_helper;
 
 // mod command;
+mod builders;
 mod doc;
 mod helpers;
 mod print;

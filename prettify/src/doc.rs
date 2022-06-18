@@ -8,6 +8,12 @@ pub enum LineMode {
 }
 
 #[derive(PartialEq, Debug, Clone)]
+pub enum AlignAmount {
+    Spaces(usize),
+    String(String),
+}
+
+#[derive(PartialEq, Debug, Clone)]
 pub enum DocCommand<'a> {
     Group(Box<Cow<'a, Doc<'a>>>, Cow<'a, DocOptions<'a>>),
     // ConditionalGroup,
@@ -25,7 +31,7 @@ pub enum DocCommand<'a> {
     Indent(Box<Cow<'a, Doc<'a>>>),
     // Dedent,
     // Align(width, contents)
-    Align(usize, Box<Cow<'a, Doc<'a>>>),
+    Align(Box<Cow<'a, Doc<'a>>>, AlignAmount),
     // MarkAsRoot,
     // DedentAsRoot,
     Trim,

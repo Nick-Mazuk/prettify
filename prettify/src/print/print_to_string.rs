@@ -5,7 +5,7 @@ use super::indent::make_indent;
 use super::line::process_line;
 use super::shared::{Command, Indent, LineSuffixes, Mode, Out};
 use super::trim::trim;
-use crate::{Doc, DocCommand, LineMode, PrettifyConfig};
+use crate::{AlignAmount, Doc, DocCommand, LineMode, PrettifyConfig};
 use std::borrow::Cow;
 use std::collections::HashMap;
 
@@ -51,7 +51,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                 DocCommand::Indent(contents) => {
                     commands.push((make_indent(indent, config), mode, *contents));
                 }
-                DocCommand::Align(width, contents) => {
+                DocCommand::Align(contents, width) => {
                     commands.push((make_align(indent, width, config), mode, *contents));
                 }
                 DocCommand::Trim => {
