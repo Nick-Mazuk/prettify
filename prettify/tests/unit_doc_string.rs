@@ -16,7 +16,7 @@ fn doc_string_2() {
 #[test]
 fn doc_children_string() {
     assert_eq!(
-        print(concat(&vec!(
+        print(concat(vec!(
             string("hello, "),
             string("world"),
             string("!")
