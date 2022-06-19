@@ -1,19 +1,26 @@
 mod align;
+mod break_parent;
 mod concat;
 mod dedent;
 mod fill;
 mod group;
+mod if_break;
 mod indent;
 mod join;
+mod line_suffix;
 mod mark;
 mod string;
+mod trim;
 
 pub use align::align;
+pub use break_parent::{break_parent, hardline_without_break_parent};
 pub use concat::concat;
 pub use dedent::{dedent, dedent_to_root};
 pub use fill::fill;
 pub use group::{group, group_with_options};
 pub use indent::indent;
 pub use join::join;
+pub use line_suffix::{line_suffix, line_suffix_boundary};
 pub use mark::mark_as_root;
 pub use string::string;
+pub use trim::trim;

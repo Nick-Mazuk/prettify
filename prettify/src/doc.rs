@@ -21,7 +21,7 @@ pub enum DocCommand<'a> {
     // ConditionalGroup,
     Fill(Vec<Cow<'a, Doc<'a>>>, DocOptions<'a>),
     // IfBreak,
-    // BreakParent,
+    BreakParent,
     Line(LineMode),
     // SoftLine,
     // HardLine,
