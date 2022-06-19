@@ -11,6 +11,8 @@ pub enum LineMode {
 pub enum AlignAmount {
     Spaces(usize),
     String(String),
+    DedentToRoot,
+    Dedent,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -30,7 +32,7 @@ pub enum DocCommand<'a> {
     Indent(Box<Cow<'a, Doc<'a>>>),
     // Dedent,
     Align(Box<Cow<'a, Doc<'a>>>, AlignAmount),
-    // MarkAsRoot,
+    Root(Box<Cow<'a, Doc<'a>>>),
     // DedentAsRoot,
     Trim,
     // IndentIfBreak,
