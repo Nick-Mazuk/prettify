@@ -1,4 +1,4 @@
-use super::super::doc::{Doc, DocOptions};
+use super::super::doc::{Doc, DocOptions, PrettifyConfig};
 use super::fits::fits;
 use super::shared::{Command, Indent, LineSuffixes, Mode, PRINT_WIDTH};
 use std::borrow::Cow;
@@ -29,8 +29,9 @@ pub fn process_fill<'a>(
     indent: &Indent,
     pos: &usize,
     line_suffixes: &LineSuffixes<'a>,
-    doc_options: &DocOptions,
+    doc_options: &DocOptions<'a>,
     mode: &Mode,
+    config: &PrettifyConfig,
 ) {
     let remainder = PRINT_WIDTH - pos;
     if contents.is_empty() {
@@ -46,6 +47,7 @@ pub fn process_fill<'a>(
         doc_options,
         !line_suffixes.is_empty(),
         true,
+        config,
     );
     if contents.len() == 1 {
         if content_fits {
@@ -91,6 +93,7 @@ pub fn process_fill<'a>(
         doc_options,
         !line_suffixes.is_empty(),
         true,
+        config,
     );
 
     commands.push(remaining_command);

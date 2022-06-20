@@ -65,6 +65,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         &mut group_mode_map,
                         &mut pos,
                         &mut should_remeasure,
+                        config,
                     );
                 }
                 DocCommand::Fill(contents, doc_options) => {
@@ -76,6 +77,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         &line_suffixes,
                         &doc_options,
                         &mode,
+                        config,
                     );
                 }
                 DocCommand::IfBreak(break_contents, flat_contents, group_id) => {

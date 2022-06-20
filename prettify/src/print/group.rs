@@ -1,4 +1,4 @@
-use super::super::doc::{Doc, DocOptions};
+use super::super::doc::{Doc, DocOptions, PrettifyConfig};
 use super::fits::fits;
 use super::shared::{Command, Indent, LineSuffixes, Mode, PRINT_WIDTH};
 use std::borrow::Cow;
@@ -14,6 +14,7 @@ pub fn process_group<'a>(
     group_mode_map: &mut HashMap<&'a str, Mode>,
     pos: &mut usize,
     should_remeasure: &mut bool,
+    config: &PrettifyConfig,
 ) {
     if *mode == Mode::Flat && !*should_remeasure {
         commands.push((
@@ -40,6 +41,7 @@ pub fn process_group<'a>(
             &doc_options,
             has_line_suffix,
             false,
+            config,
         )
     {
         commands.push(next);
