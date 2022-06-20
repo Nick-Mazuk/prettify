@@ -1,5 +1,5 @@
 use super::super::doc::{Doc, DocCommand, LineMode};
-use super::shared::{Command, Indent, LineSuffixes, Mode, Out, NEW_LINE};
+use super::shared::{Command, Indent, LineSuffixes, Mode, Out, OutKind, NEW_LINE};
 use super::trim::trim;
 use std::borrow::Cow;
 
@@ -16,7 +16,7 @@ pub fn process_line<'a>(
     doc: Cow<'a, Doc<'a>>,
 ) {
     if *mode == Mode::Flat && line_mode == LineMode::Auto {
-        out.push(String::from(" "));
+        out.push(OutKind::String(String::from(" ")));
         *pos += 1;
         return;
     }
@@ -35,11 +35,11 @@ pub fn process_line<'a>(
         line_suffixes.clear();
     }
     if line_mode == LineMode::HardLiteral {
-        out.push(NEW_LINE.to_string());
+        out.push(OutKind::String(NEW_LINE.to_string()));
         *pos = 0;
     } else {
         *pos -= trim(out);
-        out.push(NEW_LINE.to_string() + &indent.value);
+        out.push(OutKind::String(NEW_LINE.to_string() + &indent.value));
         *pos += indent.length;
     }
 }

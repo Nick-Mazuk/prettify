@@ -5,7 +5,7 @@ use super::group::process_group;
 use super::if_break::{process_if_break, process_indent_if_break};
 use super::indent::make_indent;
 use super::line::process_line;
-use super::shared::{Commands, GroupModeMap, Indent, LineSuffixes, Mode, Out};
+use super::shared::{Commands, GroupModeMap, Indent, LineSuffixes, Mode, Out, OutKind};
 use super::trim::trim;
 use std::borrow::Borrow;
 use std::borrow::Cow;
@@ -36,7 +36,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
 
         match borrowed_doc.clone() {
             Doc::String(string) => {
-                out.push(string.to_string());
+                out.push(OutKind::String(string.to_string()));
                 pos += string.len();
             }
             Doc::Children(children) => {
@@ -117,12 +117,26 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                     indent,
                     doc,
                 ),
-                DocCommand::BreakParent | DocCommand::Root(_) | DocCommand::Cursor => {
+                DocCommand::Cursor => {
+                    out.push(OutKind::Cursor);
+                }
+                DocCommand::BreakParent | DocCommand::Root(_) => {
                     // ignore
                 }
             },
         }
     }
 
-    out.join("")
+    transform_out_to_string(out)
+}
+
+fn transform_out_to_string(out: Out) -> String {
+    let mut result = String::new();
+    for kind in out.into_iter() {
+        match kind {
+            OutKind::String(string) => result.push_str(&string),
+            _ => {}
+        }
+    }
+    result
 }

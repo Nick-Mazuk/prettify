@@ -20,7 +20,7 @@ pub use concat::concat;
 pub use cursor::cursor;
 pub use dedent::{dedent, dedent_to_root};
 pub use fill::fill;
-pub use group::{group, group_with_options};
+pub use group::{conditional_group, group, group_with_options};
 pub use if_break::{if_break, indent_if_break};
 pub use indent::indent;
 pub use join::join;

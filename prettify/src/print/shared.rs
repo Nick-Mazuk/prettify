@@ -26,8 +26,14 @@ pub enum Mode {
     Flat,
 }
 
+#[derive(PartialEq, Debug, Clone)]
+pub enum OutKind {
+    String(String),
+    Cursor,
+}
+
 pub type LineSuffixes<'a> = Vec<&'a str>;
-pub type Out = Vec<String>;
+pub type Out = Vec<OutKind>;
 pub type Command<'a> = (Indent, Mode, Cow<'a, Doc<'a>>);
 pub type Commands<'a> = Vec<Command<'a>>;
 pub type GroupModeMap<'a> = std::collections::HashMap<&'a str, Mode>;
