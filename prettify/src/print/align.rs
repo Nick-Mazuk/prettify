@@ -7,13 +7,15 @@ use super::shared::{Indent, IndentKind};
 // https://sourcegraph.com/github.com/prettier/prettier/-/blob/src/document/doc-printer.js?L23
 pub fn make_align(indent: Indent, width: AlignAmount, config: &PrettifyConfig) -> Indent {
     let indent_kind = match width {
-        AlignAmount::Spaces(spaces) => IndentKind::NumberAlign(spaces),
-        AlignAmount::String(string) => IndentKind::StringAlign(string),
+        AlignAmount::DedentToRoot => None,
+        AlignAmount::Dedent => Some(IndentKind::Dedent),
+        AlignAmount::Spaces(spaces) => Some(IndentKind::NumberAlign(spaces)),
+        AlignAmount::String(string) => Some(IndentKind::StringAlign(string)),
     };
     generate_indent(
         indent,
         Indent {
-            kind: Some(indent_kind),
+            kind: indent_kind,
             length: 0,
             queue: Vec::new(),
             value: String::new(),
