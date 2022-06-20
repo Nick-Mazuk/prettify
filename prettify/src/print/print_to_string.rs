@@ -6,7 +6,9 @@ use super::indent::make_indent;
 use super::line::process_line;
 use super::shared::{Command, Indent, LineSuffixes, Mode, Out};
 use super::trim::trim;
+use std::borrow::Borrow;
 use std::borrow::Cow;
+
 use std::collections::HashMap;
 
 fn root_indent() -> Indent {
@@ -32,12 +34,9 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
     while !commands.is_empty() {
         let (indent, mode, doc) = commands.pop().unwrap();
 
-        let owned_doc = match doc {
-            Cow::Owned(owned_doc) => owned_doc,
-            Cow::Borrowed(borrowed_doc) => borrowed_doc.clone(),
-        };
+        let borrowed_doc: &Doc = doc.borrow();
 
-        match owned_doc {
+        match borrowed_doc.clone() {
             Doc::String(string) => {
                 out.push(string.to_string());
                 pos += string.len();
@@ -89,9 +88,17 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                     mode,
                     Cow::Owned(Doc::Command(DocCommand::Line(LineMode::Hard))),
                 )),
-                DocCommand::Line(line_mode) => {
-                    process_line(line_mode, &mode, &mut out, &mut pos, &mut should_remeasure)
-                }
+                DocCommand::Line(line_mode) => process_line(
+                    line_mode,
+                    &mode,
+                    &mut out,
+                    &mut pos,
+                    &mut should_remeasure,
+                    &mut line_suffixes,
+                    &mut commands,
+                    indent,
+                    doc,
+                ),
             },
         }
     }
