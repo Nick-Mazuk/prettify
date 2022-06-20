@@ -21,23 +21,17 @@ type Contents<'a> = Box<Cow<'a, Doc<'a>>>;
 #[derive(PartialEq, Debug, Clone)]
 pub enum DocCommand<'a> {
     Group(Contents<'a>, Cow<'a, DocOptions<'a>>),
-    // ConditionalGroup,
     Fill(Vec<Cow<'a, Doc<'a>>>, DocOptions<'a>),
     IfBreak(Contents<'a>, Contents<'a>, String),
     // IndentIfBreak(Contents, docId, negate)
     IndentIfBreak(Contents<'a>, String, bool),
     BreakParent,
     Line(LineMode),
-    // SoftLine,
-    // HardLine,
-    // LiteralLine,
     LineSuffix(&'a str),
     LineSuffixBoundary,
     Indent(Contents<'a>),
-    // Dedent,
     Align(Contents<'a>, AlignAmount),
     Root(Contents<'a>),
-    // DedentAsRoot,
     Cursor,
     Trim,
 }
