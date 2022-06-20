@@ -5,6 +5,7 @@ pub enum LineMode {
     Hard,
     Soft,
     Auto,
+    HardLiteral,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -15,12 +16,16 @@ pub enum AlignAmount {
     Dedent,
 }
 
+type Contents<'a> = Box<Cow<'a, Doc<'a>>>;
+
 #[derive(PartialEq, Debug, Clone)]
 pub enum DocCommand<'a> {
-    Group(Box<Cow<'a, Doc<'a>>>, Cow<'a, DocOptions<'a>>),
+    Group(Contents<'a>, Cow<'a, DocOptions<'a>>),
     // ConditionalGroup,
     Fill(Vec<Cow<'a, Doc<'a>>>, DocOptions<'a>),
-    // IfBreak,
+    IfBreak(Contents<'a>, Contents<'a>, String),
+    // IndentIfBreak(Contents, docId, negate)
+    IndentIfBreak(Contents<'a>, String, bool),
     BreakParent,
     Line(LineMode),
     // SoftLine,
@@ -28,22 +33,22 @@ pub enum DocCommand<'a> {
     // LiteralLine,
     LineSuffix(&'a str),
     LineSuffixBoundary,
-    // Indent(contents)
-    Indent(Box<Cow<'a, Doc<'a>>>),
+    Indent(Contents<'a>),
     // Dedent,
-    Align(Box<Cow<'a, Doc<'a>>>, AlignAmount),
-    Root(Box<Cow<'a, Doc<'a>>>),
+    Align(Contents<'a>, AlignAmount),
+    Root(Contents<'a>),
     // DedentAsRoot,
+    Cursor,
     Trim,
-    // IndentIfBreak,
 }
 
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Debug, Clone)]
 // or Doc Opt for short…
 // …didn't see that Spider-man reference coming, did you?
 pub struct DocOptions<'a> {
     pub should_break: bool,
     pub id: &'a str,
+    pub expanded_states: Vec<Doc<'a>>,
 }
 
 #[derive(PartialEq, Debug, Clone)]

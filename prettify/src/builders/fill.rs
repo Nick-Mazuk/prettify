@@ -7,6 +7,7 @@ pub fn fill(docs: Vec<Doc>) -> Doc {
         DocOptions {
             id: "",
             should_break: false,
+            expanded_states: vec![],
         },
     ))
 }
