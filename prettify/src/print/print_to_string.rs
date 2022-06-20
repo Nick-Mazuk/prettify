@@ -2,9 +2,10 @@ use super::super::doc::{Doc, DocCommand, LineMode, PrettifyConfig};
 use super::align::make_align;
 use super::fill::process_fill;
 use super::group::process_group;
+use super::if_break::{process_if_break, process_indent_if_break};
 use super::indent::make_indent;
 use super::line::process_line;
-use super::shared::{Command, Indent, LineSuffixes, Mode, Out};
+use super::shared::{Commands, GroupModeMap, Indent, LineSuffixes, Mode, Out};
 use super::trim::trim;
 use std::borrow::Borrow;
 use std::borrow::Cow;
@@ -19,9 +20,6 @@ fn root_indent() -> Indent {
         kind: None,
     }
 }
-
-type Commands<'a> = Vec<Command<'a>>;
-type GroupModeMap<'a> = std::collections::HashMap<&'a str, Mode>;
 
 pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
     let mut pos: usize = 0;
@@ -80,6 +78,26 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         &mode,
                     );
                 }
+                DocCommand::IfBreak(break_contents, flat_contents, group_id) => {
+                    process_if_break(
+                        break_contents,
+                        flat_contents,
+                        group_id,
+                        &mode,
+                        &group_mode_map,
+                        indent,
+                        &mut commands,
+                    );
+                }
+                DocCommand::IndentIfBreak(contents, group_id, negate) => process_indent_if_break(
+                    contents,
+                    group_id,
+                    negate,
+                    &mode,
+                    &group_mode_map,
+                    indent,
+                    &mut commands,
+                ),
                 DocCommand::LineSuffix(contents) => {
                     line_suffixes.push(contents);
                 }
@@ -99,6 +117,9 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                     indent,
                     doc,
                 ),
+                DocCommand::BreakParent | DocCommand::Root(_) | DocCommand::Cursor => {
+                    // ignore
+                }
             },
         }
     }

@@ -26,6 +26,8 @@ pub enum Mode {
     Flat,
 }
 
-pub type Command<'a> = (Indent, Mode, Cow<'a, Doc<'a>>);
 pub type LineSuffixes<'a> = Vec<&'a str>;
 pub type Out = Vec<String>;
+pub type Command<'a> = (Indent, Mode, Cow<'a, Doc<'a>>);
+pub type Commands<'a> = Vec<Command<'a>>;
+pub type GroupModeMap<'a> = std::collections::HashMap<&'a str, Mode>;

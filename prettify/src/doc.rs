@@ -16,14 +16,14 @@ pub enum AlignAmount {
     Dedent,
 }
 
-type Contents<'a> = Box<Cow<'a, Doc<'a>>>;
+pub type Contents<'a> = Box<Cow<'a, Doc<'a>>>;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum DocCommand<'a> {
     Group(Contents<'a>, Cow<'a, DocOptions<'a>>),
     Fill(Vec<Cow<'a, Doc<'a>>>, DocOptions<'a>),
     IfBreak(Contents<'a>, Contents<'a>, String),
-    // IndentIfBreak(Contents, docId, negate)
+    // IndentIfBreak(Contents, group_id, negate)
     IndentIfBreak(Contents<'a>, String, bool),
     BreakParent,
     Line(LineMode),
