@@ -20,6 +20,9 @@ pub fn process_line<'a>(
         *pos += 1;
         return;
     }
+    if *mode == Mode::Flat && line_mode == LineMode::Soft {
+        return;
+    }
     if line_mode == LineMode::Hard || line_mode == LineMode::HardLiteral {
         *should_remeasure = true;
     }
