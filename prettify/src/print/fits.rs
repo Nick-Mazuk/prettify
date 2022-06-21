@@ -62,7 +62,7 @@ pub fn fits<'a>(
                     let group_mode = if options.should_break {
                         Mode::Break
                     } else {
-                        mode
+                        Mode::Flat
                     };
                     let new_contents = if !doc_options.expanded_states.is_empty()
                         && group_mode == Mode::Break

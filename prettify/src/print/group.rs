@@ -29,26 +29,45 @@ pub fn process_group<'a>(
     };
     *should_remeasure = false;
     let mut next_mode = Mode::Flat;
-    // "&*" unboxes the contents and creates a reference of it
     let next: Command = (indent.clone(), next_mode, contents.clone());
     let remainder = PRINT_WIDTH - *pos;
     let has_line_suffix = !line_suffixes.is_empty();
-    if !doc_options.should_break
-        && fits(
-            &next,
-            commands,
-            remainder,
-            &doc_options,
-            has_line_suffix,
-            false,
-            config,
-        )
-    {
-        commands.push(next);
+    if doc_options.should_break || doc_options.expanded_states.is_empty() {
+        if !doc_options.should_break
+            && fits(
+                &next,
+                commands,
+                remainder,
+                &doc_options,
+                has_line_suffix,
+                false,
+                config,
+            )
+        {
+            commands.push(next);
+        } else {
+            *should_remeasure = true;
+            next_mode = Mode::Break;
+            commands.push((indent, Mode::Break, contents));
+        }
     } else {
-        *should_remeasure = true;
-        next_mode = Mode::Break;
-        commands.push((indent, Mode::Break, contents));
+        let expanded_states = &doc_options.expanded_states;
+        for i in 0..doc_options.expanded_states.len() {
+            let option = expanded_states[i].clone();
+            let command = (indent.clone(), next_mode, Cow::Owned(option));
+            if fits(
+                &command,
+                commands,
+                remainder,
+                &doc_options,
+                has_line_suffix,
+                false,
+                config,
+            ) {
+                commands.push(command);
+                break;
+            }
+        }
     }
     group_mode_map.insert(doc_options.id, next_mode);
 }
