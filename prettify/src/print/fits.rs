@@ -103,9 +103,11 @@ pub fn fits<'a>(
                         LineMode::Soft => {}
                     },
                 },
+                DocCommand::BreakParent => {
+                    return false;
+                }
                 DocCommand::IfBreak(_, _, _)
                 | DocCommand::IndentIfBreak(_, _, _)
-                | DocCommand::BreakParent
                 | DocCommand::Root(_)
                 | DocCommand::Cursor => {}
             },
