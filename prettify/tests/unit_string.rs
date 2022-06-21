@@ -12,3 +12,13 @@ fn doc_string_2() {
         "another string".to_string()
     );
 }
+
+#[test]
+fn leading_whitespace() {
+    assert_eq!(print(string(" string")), " string".to_string());
+}
+
+#[test]
+fn trailing_whitespace() {
+    assert_eq!(print(string("string ")), "string ".to_string());
+}
