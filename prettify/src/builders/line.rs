@@ -2,6 +2,10 @@ use super::super::doc::{Doc, DocCommand, LineMode};
 use super::break_parent::break_parent;
 use super::concat::concat;
 
+pub fn line<'a>() -> Doc<'a> {
+    Doc::Command(DocCommand::Line(LineMode::Auto))
+}
+
 pub fn soft_line<'a>() -> Doc<'a> {
     Doc::Command(DocCommand::Line(LineMode::Soft))
 }

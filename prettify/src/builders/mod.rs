@@ -25,8 +25,8 @@ pub use if_break::{if_break, indent_if_break};
 pub use indent::indent;
 pub use join::join;
 pub use line::{
-    hard_line, hard_line_without_break_parent, literal_line, literal_line_without_break_parent,
-    soft_line,
+    hard_line, hard_line_without_break_parent, line, literal_line,
+    literal_line_without_break_parent, soft_line,
 };
 pub use line_suffix::{line_suffix, line_suffix_boundary};
 pub use mark::mark_as_root;

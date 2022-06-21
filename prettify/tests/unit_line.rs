@@ -1,24 +1,24 @@
-use prettify::{concat, group, print, soft_line, string};
+use prettify::{concat, group, line, print, string};
 
 #[test]
-fn command_soft_line() {
-    assert_eq!(print(soft_line()), "\n".to_string());
+fn command_line() {
+    assert_eq!(print(line()), "\n".to_string());
 }
 
 #[test]
-fn command_soft_line_context() {
+fn command_line_context() {
     assert_eq!(
-        print(concat(vec![string("hello"), soft_line(), string("world")])),
+        print(concat(vec![string("hello"), line(), string("world")])),
         "hello\nworld".to_string()
     );
 }
 
 #[test]
-fn command_soft_line_inside_group() {
+fn command_line_inside_group() {
     assert_eq!(
         print(group(concat(vec![
-            string("hello "),
-            soft_line(),
+            string("hello"),
+            line(),
             string("world")
         ]))),
         "hello world".to_string()
@@ -26,11 +26,11 @@ fn command_soft_line_inside_group() {
 }
 
 #[test]
-fn command_soft_line_inside_group_long_text() {
+fn command_line_inside_group_long_text() {
     assert_eq!(
         print(group(concat(vec![
             string("this is a very long piece of text that definitely overflows the line"),
-            soft_line(),
+            line(),
             string("this is a very long piece of text that definitely overflows the line")
         ]))),
         "this is a very long piece of text that definitely overflows the line\nthis is a very long piece of text that definitely overflows the line".to_string()

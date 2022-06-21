@@ -34,6 +34,9 @@ pub fn fits<'a>(
 
         match borrowed_doc.clone() {
             Doc::String(string) => {
+                if string.len() > remainder {
+                    return false;
+                }
                 out.push(OutKind::String(string.to_string()));
                 remainder -= string.len();
             }

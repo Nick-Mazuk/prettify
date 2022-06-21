@@ -24,3 +24,15 @@ fn command_hardline_context_inside_group() {
         "hello\nworld".to_string()
     );
 }
+
+#[test]
+fn command_hard_line_inside_group_long_text() {
+    assert_eq!(
+        print(group(concat(vec![
+            string("this is a very long piece of text that definitely overflows the line"),
+            hard_line(),
+            string("this is a very long piece of text that definitely overflows the line")
+        ]))),
+        "this is a very long piece of text that definitely overflows the line\nthis is a very long piece of text that definitely overflows the line".to_string()
+    );
+}
