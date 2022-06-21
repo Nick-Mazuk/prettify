@@ -1,24 +1,28 @@
-use prettify::{concat, group, hard_line, print, string};
+use prettify::{concat, group, literal_line, print, string};
 
 #[test]
-fn command_hard_line() {
-    assert_eq!(print(hard_line()), "\n".to_string());
+fn command_literal_line() {
+    assert_eq!(print(literal_line()), "\n".to_string());
 }
 
 #[test]
-fn command_hard_line_context() {
+fn command_literal_line_context() {
     assert_eq!(
-        print(concat(vec![string("hello"), hard_line(), string("world")])),
+        print(concat(vec![
+            string("hello"),
+            literal_line(),
+            string("world")
+        ])),
         "hello\nworld".to_string()
     );
 }
 
 #[test]
-fn command_hard_line_context_inside_group() {
+fn command_literal_line_context_inside_group() {
     assert_eq!(
         print(group(concat(vec![
             string("hello"),
-            hard_line(),
+            literal_line(),
             string("world")
         ]))),
         "hello\nworld".to_string()
@@ -26,11 +30,11 @@ fn command_hard_line_context_inside_group() {
 }
 
 #[test]
-fn command_hard_line_context_inside_group_long_text() {
+fn command_literal_line_context_inside_group_long_text() {
     assert_eq!(
         print(group(concat(vec![
             string("this is a very long piece of text that definitely overflows the line"),
-            hard_line(),
+            literal_line(),
             string("this is a very long piece of text that definitely overflows the line")
         ]))),
         "this is a very long piece of text that definitely overflows the line\nthis is a very long piece of text that definitely overflows the line".to_string()
@@ -38,26 +42,26 @@ fn command_hard_line_context_inside_group_long_text() {
 }
 
 #[test]
-fn remove_trailing_whitespace() {
+fn preserve_trailing_whitespace() {
     assert_eq!(
         print(group(concat(vec![
             string("hello    "),
-            hard_line(),
+            literal_line(),
             string("world")
         ]))),
-        "hello\nworld".to_string()
+        "hello    \nworld".to_string()
     );
 }
 
 #[test]
-fn remove_trailing_whitespace_long_text() {
+fn preserve_trailing_whitespace_long_text() {
     assert_eq!(
         print(group(concat(vec![
             string("this is a very long piece of text that definitely overflows the line    "),
-            hard_line(),
+            literal_line(),
             string("this is a very long piece of text that definitely overflows the line")
         ]))),
-        "this is a very long piece of text that definitely overflows the line\nthis is a very long piece of text that definitely overflows the line".to_string()
+        "this is a very long piece of text that definitely overflows the line    \nthis is a very long piece of text that definitely overflows the line".to_string()
     );
 }
 
@@ -65,8 +69,8 @@ fn remove_trailing_whitespace_long_text() {
 fn preserve_leading_whitespace() {
     assert_eq!(
         print(group(concat(vec![
-            string("hello    "),
-            hard_line(),
+            string("hello"),
+            literal_line(),
             string("    world")
         ]))),
         "hello\n    world".to_string()
@@ -77,8 +81,8 @@ fn preserve_leading_whitespace() {
 fn preserve_leading_whitespace_long_text() {
     assert_eq!(
         print(group(concat(vec![
-            string("this is a very long piece of text that definitely overflows the line    "),
-            hard_line(),
+            string("this is a very long piece of text that definitely overflows the line"),
+            literal_line(),
             string("    this is a very long piece of text that definitely overflows the line")
         ]))),
         "this is a very long piece of text that definitely overflows the line\n    this is a very long piece of text that definitely overflows the line".to_string()
