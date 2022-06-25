@@ -114,7 +114,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         group_mode_map.insert(options.id, next_mode);
                     }
                 }
-                DocCommand::Fill(contents, doc_options) => {
+                DocCommand::Fill(mut contents, doc_options) => {
                     let remainder = PRINT_WIDTH - pos;
                     if !contents.is_empty() {
                         let content = &contents[0];
@@ -153,17 +153,8 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                                     commands.push(whitespace_command_break);
                                 }
                             } else {
-                                let mut cloned_contents = contents.clone();
-                                let item_0 = cloned_contents.remove(0);
-                                let item_1 = cloned_contents.remove(0);
-                                let remaining_command: Command = (
-                                    indent.clone(),
-                                    mode,
-                                    Doc::Command(DocCommand::Fill(
-                                        cloned_contents.clone(),
-                                        doc_options.clone(),
-                                    )),
-                                );
+                                let item_0 = contents.remove(0);
+                                let item_1 = contents.remove(0);
                                 let first_and_second_content_flat_command: Command = (
                                     indent.clone(),
                                     Mode::Flat,
@@ -177,6 +168,11 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                                     !line_suffixes.is_empty(),
                                     true,
                                     config,
+                                );
+                                let remaining_command: Command = (
+                                    indent,
+                                    mode,
+                                    Doc::Command(DocCommand::Fill(contents, doc_options)),
                                 );
 
                                 commands.push(remaining_command);
@@ -246,11 +242,11 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                             should_remeasure = true;
                         }
                         if !line_suffixes.is_empty() {
-                            commands.push((indent.clone(), mode.clone(), doc));
-                            for suffix in line_suffixes.clone().into_iter().rev() {
+                            commands.push((indent.clone(), mode, doc));
+                            for suffix in line_suffixes.iter().rev() {
                                 commands.push((
                                     indent.clone(),
-                                    mode.clone(),
+                                    mode,
                                     Doc::Command(DocCommand::LineSuffix(suffix)),
                                 ));
                             }
