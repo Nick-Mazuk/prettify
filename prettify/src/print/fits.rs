@@ -3,6 +3,7 @@ use super::align::make_align;
 use super::indent::make_indent;
 use super::shared::{Command, Commands, Mode, Out, OutKind};
 use super::trim::trim;
+use std::borrow::Borrow;
 use std::rc::Rc;
 
 pub fn fits<'a>(
@@ -31,7 +32,7 @@ pub fn fits<'a>(
         }
         let (indent, mode, doc) = commands.pop().unwrap();
 
-        match doc {
+        match doc.borrow() {
             Doc::String(string) => {
                 if string.len() > remainder {
                     return false;
@@ -41,15 +42,23 @@ pub fn fits<'a>(
             }
             Doc::Children(children) => {
                 for child in children.into_iter().rev() {
-                    commands.push((Rc::clone(&indent), mode, child.clone()));
+                    commands.push((Rc::clone(&indent), mode, Rc::clone(child)));
                 }
             }
             Doc::Command(command) => match command {
                 DocCommand::Indent(contents) => {
-                    commands.push((make_indent(Rc::clone(&indent), config), mode, *contents));
+                    commands.push((
+                        make_indent(Rc::clone(&indent), config),
+                        mode,
+                        Rc::clone(contents),
+                    ));
                 }
                 DocCommand::Align(contents, width) => {
-                    commands.push((make_align(indent, width, config), mode, *contents));
+                    commands.push((
+                        make_align(indent, width.clone(), config),
+                        mode,
+                        Rc::clone(contents),
+                    ));
                 }
                 DocCommand::Trim => {
                     remainder += trim(&mut out);
@@ -65,15 +74,15 @@ pub fn fits<'a>(
                     };
                     let new_contents =
                         if !doc_options.expanded_states.is_empty() && group_mode == Mode::Break {
-                            (&options.expanded_states[options.expanded_states.len() - 1]).clone()
+                            Rc::clone(&options.expanded_states[options.expanded_states.len() - 1])
                         } else {
-                            *contents
+                            Rc::clone(contents)
                         };
-                    commands.push((indent, group_mode, new_contents));
+                    commands.push((indent, group_mode, Rc::clone(&new_contents)));
                 }
                 DocCommand::Fill(contents, _) => {
                     for child in contents.into_iter().rev() {
-                        commands.push((Rc::clone(&indent), mode, child.clone()));
+                        commands.push((Rc::clone(&indent), mode, Rc::clone(child)));
                     }
                 }
                 DocCommand::LineSuffix(_) => {

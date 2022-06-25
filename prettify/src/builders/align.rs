@@ -1,10 +1,11 @@
 use super::super::doc::{AlignAmount, Doc, DocCommand};
+use std::rc::Rc;
 
-pub fn align(contents: Doc, amount: AlignAmount) -> Doc {
-    Doc::Command(DocCommand::Align(Box::new(contents), amount))
+pub fn align(contents: Rc<Doc>, amount: AlignAmount) -> Rc<Doc> {
+    Rc::new(Doc::Command(DocCommand::Align(contents, amount)))
 }
 
-pub fn add_alignment_to_doc(doc: Doc, size: usize, tab_width: usize) -> Doc {
+pub fn add_alignment_to_doc(doc: Rc<Doc>, size: usize, tab_width: usize) -> Rc<Doc> {
     let mut aligned = doc;
     if size > 0 {
         // Use indent to add tabs for all the levels of tabs we need

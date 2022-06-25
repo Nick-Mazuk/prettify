@@ -22,7 +22,7 @@ pub fn generate_indent(
 ) -> Rc<Indent> {
     // true implementation https://sourcegraph.com/github.com/prettier/prettier/-/blob/src/document/doc-printer.js?L19:10
 
-    let queue = generate_initial_queue(&indent, new_indent);
+    let queue = generate_initial_queue(&indent, Rc::new(new_indent));
     let mut value = String::new();
     let mut length = 0;
     let mut last_spaces = 0;
@@ -55,7 +55,7 @@ pub fn generate_indent(
     })
 }
 
-fn generate_initial_queue(indent: &Indent, new_indent: Indent) -> Vec<Indent> {
+fn generate_initial_queue(indent: &Indent, new_indent: Rc<Indent>) -> Vec<Rc<Indent>> {
     match new_indent.kind {
         Some(IndentKind::Dedent) => {
             let mut cloned_queue = indent.queue.clone();

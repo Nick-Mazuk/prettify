@@ -1,5 +1,6 @@
 use super::super::doc::{Doc, DocCommand};
+use std::rc::Rc;
 
-pub fn cursor<'a>() -> Doc<'a> {
-    Doc::Command(DocCommand::Cursor)
+pub fn cursor<'a>() -> Rc<Doc<'a>> {
+    Rc::new(Doc::Command(DocCommand::Cursor))
 }

@@ -16,7 +16,7 @@ pub enum IndentKind {
 pub struct Indent {
     pub value: String,
     pub length: usize,
-    pub queue: Vec<Indent>,
+    pub queue: Vec<Rc<Indent>>,
     pub kind: Option<IndentKind>,
 }
 
@@ -34,6 +34,6 @@ pub enum OutKind {
 
 pub type LineSuffixes<'a> = Vec<&'a str>;
 pub type Out = Vec<OutKind>;
-pub type Command<'a> = (Rc<Indent>, Mode, Doc<'a>);
+pub type Command<'a> = (Rc<Indent>, Mode, Rc<Doc<'a>>);
 pub type Commands<'a> = Vec<Command<'a>>;
 pub type GroupModeMap<'a> = std::collections::HashMap<&'a str, Mode>;

@@ -9,6 +9,7 @@ use super::shared::{
 use super::trim::trim;
 use crate::indent as build_indent;
 
+use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -26,7 +27,7 @@ fn root_indent() -> Rc<Indent> {
 // 2. Breaking each match block into separate functions requires the use of Cow<'a, Doc<'a>
 //    which creates a lot of extra .clone() calls.
 // 3. Using Cows leads to a lot of extra boilerplate and unintuitive patterns.
-pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
+pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String {
     let mut pos: usize = 0;
     let mut should_remeasure = false;
     let mut out: Out = vec![];
@@ -37,22 +38,26 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
     while !commands.is_empty() {
         let (indent, mode, doc) = commands.pop().unwrap();
 
-        match doc.clone() {
+        match doc.borrow() {
             Doc::String(string) => {
                 out.push(OutKind::String(string.to_string()));
                 pos += string.len();
             }
             Doc::Children(children) => {
                 for child in children.into_iter().rev() {
-                    commands.push((Rc::clone(&indent), mode, child));
+                    commands.push((Rc::clone(&indent), mode, Rc::clone(child)));
                 }
             }
             Doc::Command(command) => match command {
                 DocCommand::Indent(contents) => {
-                    commands.push((make_indent(indent, config), mode, *contents));
+                    commands.push((make_indent(indent, config), mode, Rc::clone(&contents)));
                 }
                 DocCommand::Align(contents, width) => {
-                    commands.push((make_align(indent, width, config), mode, *contents));
+                    commands.push((
+                        make_align(indent, width.clone(), config),
+                        mode,
+                        Rc::clone(&contents),
+                    ));
                 }
                 DocCommand::Trim => {
                     pos -= trim(&mut out);
@@ -66,12 +71,12 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                             } else {
                                 Mode::Flat
                             },
-                            *contents.clone(),
+                            Rc::clone(&contents),
                         ));
                     };
                     should_remeasure = false;
                     let mut next_mode = Mode::Flat;
-                    let next: Command = (Rc::clone(&indent), next_mode, *contents.clone());
+                    let next: Command = (Rc::clone(&indent), next_mode, Rc::clone(&contents));
                     let remainder = PRINT_WIDTH - pos;
                     let has_line_suffix = !line_suffixes.is_empty();
                     let mut should_insert_into_map = true;
@@ -91,12 +96,12 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         } else {
                             should_remeasure = true;
                             next_mode = Mode::Break;
-                            commands.push((indent, Mode::Break, *contents));
+                            commands.push((indent, Mode::Break, Rc::clone(&contents)));
                         }
                     } else {
                         let expanded_states = &options.expanded_states;
                         for option in expanded_states.iter().take(options.expanded_states.len()) {
-                            let command = (Rc::clone(&indent), next_mode, option.clone());
+                            let command = (Rc::clone(&indent), next_mode, Rc::clone(option));
                             if fits(
                                 &command,
                                 &commands,
@@ -115,14 +120,14 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         group_mode_map.insert(options.id, next_mode);
                     }
                 }
-                DocCommand::Fill(mut contents, doc_options) => {
+                DocCommand::Fill(contents, doc_options) => {
                     let remainder = PRINT_WIDTH - pos;
                     if !contents.is_empty() {
                         let content = &contents[0];
                         let contents_command_flat: Command =
-                            (Rc::clone(&indent), Mode::Flat, content.clone());
+                            (Rc::clone(&indent), Mode::Flat, Rc::clone(content));
                         let contents_command_break: Command =
-                            (Rc::clone(&indent), Mode::Break, content.clone());
+                            (Rc::clone(&indent), Mode::Break, Rc::clone(content));
                         let content_fits = fits(
                             &contents_command_flat,
                             &Vec::new(),
@@ -141,9 +146,9 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         } else {
                             let whitespace = &contents[1];
                             let whitespace_command_flat: Command =
-                                (Rc::clone(&indent), Mode::Flat, whitespace.clone());
+                                (Rc::clone(&indent), Mode::Flat, Rc::clone(whitespace));
                             let whitespace_command_break: Command =
-                                (Rc::clone(&indent), Mode::Break, whitespace.clone());
+                                (Rc::clone(&indent), Mode::Break, Rc::clone(whitespace));
 
                             if contents.len() == 2 {
                                 if content_fits {
@@ -154,12 +159,13 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                                     commands.push(whitespace_command_break);
                                 }
                             } else {
-                                let item_0 = contents.remove(0);
-                                let item_1 = contents.remove(0);
+                                let mut cloned_contents = contents.clone();
+                                let item_0 = cloned_contents.remove(0);
+                                let item_1 = cloned_contents.remove(0);
                                 let first_and_second_content_flat_command: Command = (
                                     Rc::clone(&indent),
                                     Mode::Flat,
-                                    Doc::Children(vec![item_0, item_1]),
+                                    Rc::new(Doc::Children(vec![item_0, item_1])),
                                 );
                                 let first_and_second_content_fits = fits(
                                     &first_and_second_content_flat_command,
@@ -173,7 +179,10 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                                 let remaining_command: Command = (
                                     indent,
                                     mode,
-                                    Doc::Command(DocCommand::Fill(contents, doc_options)),
+                                    Rc::new(Doc::Command(DocCommand::Fill(
+                                        cloned_contents,
+                                        doc_options.clone(),
+                                    ))),
                                 );
 
                                 commands.push(remaining_command);
@@ -199,10 +208,10 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                     };
                     match group_mode {
                         Mode::Break => {
-                            commands.push((indent, mode, *break_contents));
+                            commands.push((indent, mode, Rc::clone(&break_contents)));
                         }
                         Mode::Flat => {
-                            commands.push((indent, mode, *flat_contents));
+                            commands.push((indent, mode, Rc::clone(&flat_contents)));
                         }
                     }
                 }
@@ -213,17 +222,17 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                     };
                     match group_mode {
                         Mode::Break => {
-                            if negate {
-                                commands.push((indent, mode, *contents));
+                            if *negate {
+                                commands.push((indent, mode, Rc::clone(&contents)));
                             } else {
-                                commands.push((indent, mode, build_indent(*contents)));
+                                commands.push((indent, mode, build_indent(Rc::clone(contents))));
                             }
                         }
                         Mode::Flat => {
-                            if negate {
-                                commands.push((indent, mode, build_indent(*contents)));
+                            if *negate {
+                                commands.push((indent, mode, build_indent(Rc::clone(contents))));
                             } else {
-                                commands.push((indent, mode, *contents));
+                                commands.push((indent, mode, Rc::clone(&contents)));
                             }
                         }
                     }
@@ -231,19 +240,21 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                 DocCommand::LineSuffix(contents) => {
                     line_suffixes.push(contents);
                 }
-                DocCommand::LineSuffixBoundary => {
-                    commands.push((indent, mode, Doc::Command(DocCommand::Line(LineMode::Hard))))
-                }
+                DocCommand::LineSuffixBoundary => commands.push((
+                    indent,
+                    mode,
+                    Rc::new(Doc::Command(DocCommand::Line(LineMode::Hard))),
+                )),
                 DocCommand::Line(line_mode) => {
-                    if mode == Mode::Flat && line_mode == LineMode::Auto {
+                    if mode == Mode::Flat && *line_mode == LineMode::Auto {
                         out.push(OutKind::String(String::from(" ")));
                         pos += 1;
-                    } else if mode != Mode::Flat || line_mode != LineMode::Soft {
-                        if line_mode == LineMode::Hard || line_mode == LineMode::HardLiteral {
+                    } else if mode != Mode::Flat || *line_mode != LineMode::Soft {
+                        if *line_mode == LineMode::Hard || *line_mode == LineMode::HardLiteral {
                             should_remeasure = true;
                         }
                         if line_suffixes.is_empty() {
-                            if line_mode == LineMode::HardLiteral {
+                            if *line_mode == LineMode::HardLiteral {
                                 out.push(OutKind::String(NEW_LINE.to_string()));
                                 pos = 0;
                             } else {
@@ -257,7 +268,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                                 commands.push((
                                     Rc::clone(&indent),
                                     mode,
-                                    Doc::String(suffix.to_string()),
+                                    Rc::new(Doc::String(suffix.to_string())),
                                 ));
                             }
                             line_suffixes.clear();

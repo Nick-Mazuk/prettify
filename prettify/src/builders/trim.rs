@@ -1,5 +1,6 @@
 use super::super::doc::{Doc, DocCommand};
+use std::rc::Rc;
 
-pub fn trim<'a>() -> Doc<'a> {
-    Doc::Command(DocCommand::Trim)
+pub fn trim<'a>() -> Rc<Doc<'a>> {
+    Rc::new(Doc::Command(DocCommand::Trim))
 }

@@ -1,17 +1,22 @@
 use super::super::doc::{Doc, DocCommand};
+use std::rc::Rc;
 
-pub fn if_break<'a>(break_contents: Doc<'a>, flat_contents: Doc<'a>, group_id: String) -> Doc<'a> {
-    Doc::Command(DocCommand::IfBreak(
-        Box::new(break_contents),
-        Box::new(flat_contents),
+pub fn if_break<'a>(
+    break_contents: Rc<Doc<'a>>,
+    flat_contents: Rc<Doc<'a>>,
+    group_id: String,
+) -> Rc<Doc<'a>> {
+    Rc::new(Doc::Command(DocCommand::IfBreak(
+        break_contents,
+        flat_contents,
         group_id,
-    ))
+    )))
 }
 
-pub fn indent_if_break(break_contents: Doc, group_id: String, negate: bool) -> Doc {
-    Doc::Command(DocCommand::IndentIfBreak(
-        Box::new(break_contents),
+pub fn indent_if_break(break_contents: Rc<Doc>, group_id: String, negate: bool) -> Rc<Doc> {
+    Rc::new(Doc::Command(DocCommand::IndentIfBreak(
+        break_contents,
         group_id,
         negate,
-    ))
+    )))
 }

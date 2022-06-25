@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 #[derive(PartialEq, Debug, Clone)]
 pub enum LineMode {
     Hard,
@@ -14,12 +16,12 @@ pub enum AlignAmount {
     Dedent,
 }
 
-pub type Contents<'a> = Box<Doc<'a>>;
+pub type Contents<'a> = Rc<Doc<'a>>;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum DocCommand<'a> {
     Group(Contents<'a>, DocOptions<'a>),
-    Fill(Vec<Doc<'a>>, DocOptions<'a>),
+    Fill(Vec<Rc<Doc<'a>>>, DocOptions<'a>),
     IfBreak(Contents<'a>, Contents<'a>, String),
     // IndentIfBreak(Contents, group_id, negate)
     IndentIfBreak(Contents<'a>, String, bool),
@@ -40,13 +42,13 @@ pub enum DocCommand<'a> {
 pub struct DocOptions<'a> {
     pub should_break: bool,
     pub id: &'a str,
-    pub expanded_states: Vec<Doc<'a>>,
+    pub expanded_states: Vec<Rc<Doc<'a>>>,
 }
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Doc<'a> {
     String(String),
-    Children(Vec<Doc<'a>>),
+    Children(Vec<Rc<Doc<'a>>>),
     Command(DocCommand<'a>),
 }
 
