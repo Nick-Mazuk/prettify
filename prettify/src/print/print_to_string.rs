@@ -20,6 +20,11 @@ fn root_indent() -> Indent {
     }
 }
 
+// This function is long for three reasons:
+// 1. Using a stack is substantially faster than making it recursive
+// 2. Breaking each match block into separate functions requires the use of Cow<'a, Doc<'a>
+//    which creates a lot of extra .clone() calls.
+// 3. Using Cows leads to a lot of extra boilerplate and unintuitive patterns.
 pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
     let mut pos: usize = 0;
     let mut should_remeasure = false;
