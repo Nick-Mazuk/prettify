@@ -20,7 +20,7 @@ pub fn fits<'a>(
     let mut out: Out = Vec::new();
     let mut has_line_suffix = has_line_suffix_default;
     while remainder > 0 {
-        if commands.len() == 0 {
+        if commands.is_empty() {
             if remainder_index == 0 {
                 return true;
             }

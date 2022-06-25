@@ -8,7 +8,7 @@ pub fn if_break<'a>(break_contents: Doc<'a>, flat_contents: Doc<'a>, group_id: S
     ))
 }
 
-pub fn indent_if_break<'a>(break_contents: Doc<'a>, group_id: String, negate: bool) -> Doc<'a> {
+pub fn indent_if_break(break_contents: Doc, group_id: String, negate: bool) -> Doc {
     Doc::Command(DocCommand::IndentIfBreak(
         Box::new(break_contents),
         group_id,

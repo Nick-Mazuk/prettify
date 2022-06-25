@@ -94,9 +94,8 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         }
                     } else {
                         let expanded_states = &options.expanded_states;
-                        for i in 0..options.expanded_states.len() {
-                            let option = expanded_states[i].clone();
-                            let command = (indent.clone(), next_mode, option);
+                        for option in expanded_states.iter().take(options.expanded_states.len()) {
+                            let command = (indent.clone(), next_mode, option.clone());
                             if fits(
                                 &command,
                                 &commands,
@@ -280,9 +279,8 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
 fn transform_out_to_string(out: Out) -> String {
     let mut result = String::new();
     for kind in out.into_iter() {
-        match kind {
-            OutKind::String(string) => result.push_str(&string),
-            _ => {}
+        if let OutKind::String(string) = kind {
+            result.push_str(&string)
         }
     }
     result
