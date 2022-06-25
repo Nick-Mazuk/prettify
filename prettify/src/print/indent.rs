@@ -40,6 +40,7 @@ pub fn generate_indent(
             }
             Some(IndentKind::NumberAlign(width)) => {
                 last_spaces += width;
+                add_spaces(&mut value, *width, &mut length);
             }
             Some(IndentKind::Dedent) | None => {
                 panic!("Unexpected indent kind");
