@@ -1,4 +1,5 @@
 use super::super::doc::Doc;
+use std::rc::Rc;
 
 pub const PRINT_WIDTH: usize = 80;
 pub const NEW_LINE: char = '\n';
@@ -33,6 +34,6 @@ pub enum OutKind {
 
 pub type LineSuffixes<'a> = Vec<&'a str>;
 pub type Out = Vec<OutKind>;
-pub type Command<'a> = (Indent, Mode, Doc<'a>);
+pub type Command<'a> = (Rc<Indent>, Mode, Doc<'a>);
 pub type Commands<'a> = Vec<Command<'a>>;
 pub type GroupModeMap<'a> = std::collections::HashMap<&'a str, Mode>;

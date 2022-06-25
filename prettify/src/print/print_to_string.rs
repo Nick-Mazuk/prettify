@@ -10,14 +10,15 @@ use super::trim::trim;
 use crate::indent as build_indent;
 
 use std::collections::HashMap;
+use std::rc::Rc;
 
-fn root_indent() -> Indent {
-    Indent {
+fn root_indent() -> Rc<Indent> {
+    Rc::new(Indent {
         value: String::new(),
         length: 0,
         queue: Vec::new(),
         kind: None,
-    }
+    })
 }
 
 // This function is long for three reasons:
@@ -43,7 +44,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
             }
             Doc::Children(children) => {
                 for child in children.into_iter().rev() {
-                    commands.push((indent.clone(), mode, child));
+                    commands.push((Rc::clone(&indent), mode, child));
                 }
             }
             Doc::Command(command) => match command {
@@ -59,7 +60,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                 DocCommand::Group(contents, options) => {
                     if mode == Mode::Flat && !should_remeasure {
                         commands.push((
-                            indent.clone(),
+                            Rc::clone(&indent),
                             if options.should_break {
                                 Mode::Break
                             } else {
@@ -70,7 +71,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                     };
                     should_remeasure = false;
                     let mut next_mode = Mode::Flat;
-                    let next: Command = (indent.clone(), next_mode, *contents.clone());
+                    let next: Command = (Rc::clone(&indent), next_mode, *contents.clone());
                     let remainder = PRINT_WIDTH - pos;
                     let has_line_suffix = !line_suffixes.is_empty();
                     let mut should_insert_into_map = true;
@@ -95,7 +96,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                     } else {
                         let expanded_states = &options.expanded_states;
                         for option in expanded_states.iter().take(options.expanded_states.len()) {
-                            let command = (indent.clone(), next_mode, option.clone());
+                            let command = (Rc::clone(&indent), next_mode, option.clone());
                             if fits(
                                 &command,
                                 &commands,
@@ -119,9 +120,9 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                     if !contents.is_empty() {
                         let content = &contents[0];
                         let contents_command_flat: Command =
-                            (indent.clone(), Mode::Flat, content.clone());
+                            (Rc::clone(&indent), Mode::Flat, content.clone());
                         let contents_command_break: Command =
-                            (indent.clone(), Mode::Break, content.clone());
+                            (Rc::clone(&indent), Mode::Break, content.clone());
                         let content_fits = fits(
                             &contents_command_flat,
                             &Vec::new(),
@@ -140,9 +141,9 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         } else {
                             let whitespace = &contents[1];
                             let whitespace_command_flat: Command =
-                                (indent.clone(), Mode::Flat, whitespace.clone());
+                                (Rc::clone(&indent), Mode::Flat, whitespace.clone());
                             let whitespace_command_break: Command =
-                                (indent.clone(), Mode::Break, whitespace.clone());
+                                (Rc::clone(&indent), Mode::Break, whitespace.clone());
 
                             if contents.len() == 2 {
                                 if content_fits {
@@ -156,7 +157,7 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                                 let item_0 = contents.remove(0);
                                 let item_1 = contents.remove(0);
                                 let first_and_second_content_flat_command: Command = (
-                                    indent.clone(),
+                                    Rc::clone(&indent),
                                     Mode::Flat,
                                     Doc::Children(vec![item_0, item_1]),
                                 );
@@ -251,10 +252,10 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                                 pos = indent.length;
                             }
                         } else {
-                            commands.push((indent.clone(), mode, doc));
+                            commands.push((Rc::clone(&indent), mode, doc));
                             for suffix in line_suffixes.iter().rev() {
                                 commands.push((
-                                    indent.clone(),
+                                    Rc::clone(&indent),
                                     mode,
                                     Doc::String(suffix.to_string()),
                                 ));

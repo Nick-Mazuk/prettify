@@ -3,6 +3,7 @@ use super::align::make_align;
 use super::indent::make_indent;
 use super::shared::{Command, Commands, Mode, Out, OutKind};
 use super::trim::trim;
+use std::rc::Rc;
 
 pub fn fits<'a>(
     next: &Command<'a>,
@@ -40,12 +41,12 @@ pub fn fits<'a>(
             }
             Doc::Children(children) => {
                 for child in children.into_iter().rev() {
-                    commands.push((indent.clone(), mode, child.clone()));
+                    commands.push((Rc::clone(&indent), mode, child.clone()));
                 }
             }
             Doc::Command(command) => match command {
                 DocCommand::Indent(contents) => {
-                    commands.push((make_indent(indent, config), mode, *contents));
+                    commands.push((make_indent(Rc::clone(&indent), config), mode, *contents));
                 }
                 DocCommand::Align(contents, width) => {
                     commands.push((make_align(indent, width, config), mode, *contents));
@@ -68,11 +69,11 @@ pub fn fits<'a>(
                         } else {
                             *contents
                         };
-                    commands.push((indent.clone(), group_mode, new_contents));
+                    commands.push((indent, group_mode, new_contents));
                 }
                 DocCommand::Fill(contents, _) => {
                     for child in contents.into_iter().rev() {
-                        commands.push((indent.clone(), mode, child.clone()));
+                        commands.push((Rc::clone(&indent), mode, child.clone()));
                     }
                 }
                 DocCommand::LineSuffix(_) => {

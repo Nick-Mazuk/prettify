@@ -1,7 +1,8 @@
 use super::super::doc::PrettifyConfig;
 use super::shared::{Indent, IndentKind};
+use std::rc::Rc;
 
-pub fn make_indent(indent: Indent, config: &PrettifyConfig) -> Indent {
+pub fn make_indent(indent: Rc<Indent>, config: &PrettifyConfig) -> Rc<Indent> {
     generate_indent(
         indent,
         Indent {
@@ -14,7 +15,11 @@ pub fn make_indent(indent: Indent, config: &PrettifyConfig) -> Indent {
     )
 }
 
-pub fn generate_indent(indent: Indent, new_indent: Indent, config: &PrettifyConfig) -> Indent {
+pub fn generate_indent(
+    indent: Rc<Indent>,
+    new_indent: Indent,
+    config: &PrettifyConfig,
+) -> Rc<Indent> {
     // true implementation https://sourcegraph.com/github.com/prettier/prettier/-/blob/src/document/doc-printer.js?L19:10
 
     let queue = generate_initial_queue(&indent, new_indent);
@@ -42,12 +47,12 @@ pub fn generate_indent(indent: Indent, new_indent: Indent, config: &PrettifyConf
         }
     }
 
-    Indent {
+    Rc::new(Indent {
         value,
         length,
         queue,
-        kind: indent.kind,
-    }
+        kind: indent.as_ref().clone().kind,
+    })
 }
 
 fn generate_initial_queue(indent: &Indent, new_indent: Indent) -> Vec<Indent> {
