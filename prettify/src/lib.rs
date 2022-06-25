@@ -1,13 +1,9 @@
 extern crate regex;
 pub use builders::*;
 use doc::{Doc, PrettifyConfig};
-// pub use doc::*;
-// use helpers::print_doc_helper;
 
-// mod command;
 mod builders;
 mod doc;
-mod helpers;
 mod print;
 
 pub const PRETTIFY_DEFAULT_CONFIG: PrettifyConfig = PrettifyConfig { tab_width: 4 };
