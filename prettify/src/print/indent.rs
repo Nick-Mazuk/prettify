@@ -42,8 +42,6 @@ pub fn generate_indent(indent: Indent, new_indent: Indent, config: &PrettifyConf
         }
     }
 
-    flush_spaces(&mut value, &mut length, &mut last_spaces);
-
     Indent {
         value,
         length,
@@ -67,17 +65,16 @@ fn generate_initial_queue(indent: &Indent, new_indent: Indent) -> Vec<Indent> {
     }
 }
 
-fn add_spaces(value: &mut String, mut count: usize, length: &mut usize) {
+fn add_spaces(value: &mut String, count: usize, length: &mut usize) {
     *length += count;
-    while count > 0 {
+    for _ in 0..count {
         value.push(' ');
-        count -= 1;
     }
 }
 
 fn flush_spaces(value: &mut String, last_spaces: &mut usize, length: &mut usize) {
     if (*last_spaces) > 0 {
         add_spaces(value, *last_spaces, length);
-        *last_spaces = 0;
     }
+    *last_spaces = 0;
 }
