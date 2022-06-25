@@ -31,7 +31,6 @@ pub enum DocCommand<'a> {
     LineSuffixBoundary,
     Indent(Contents<'a>),
     Align(Contents<'a>, AlignAmount),
-    Root(Contents<'a>),
     Cursor,
     Trim,
 }

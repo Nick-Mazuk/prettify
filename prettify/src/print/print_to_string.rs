@@ -278,7 +278,7 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                 DocCommand::Cursor => {
                     out.push(OutKind::Cursor);
                 }
-                DocCommand::BreakParent | DocCommand::Root(_) => {
+                DocCommand::BreakParent => {
                     // ignore
                 }
             },

@@ -10,7 +10,6 @@ mod indent;
 mod join;
 mod line;
 mod line_suffix;
-mod mark;
 mod string;
 mod trim;
 
@@ -29,6 +28,5 @@ pub use line::{
     literal_line_without_break_parent, soft_line,
 };
 pub use line_suffix::{line_suffix, line_suffix_boundary};
-pub use mark::mark_as_root;
 pub use string::string;
 pub use trim::trim;

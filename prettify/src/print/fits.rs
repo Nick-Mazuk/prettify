@@ -113,7 +113,6 @@ pub fn fits<'a>(
                 }
                 DocCommand::IfBreak(_, _, _)
                 | DocCommand::IndentIfBreak(_, _, _)
-                | DocCommand::Root(_)
                 | DocCommand::Cursor => {}
             },
         }
