@@ -47,7 +47,7 @@ pub struct DocOptions<'a> {
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Doc<'a> {
-    String(&'a str),
+    String(String),
     Children(Vec<Cow<'a, Doc<'a>>>),
     Command(DocCommand<'a>),
 }

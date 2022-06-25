@@ -14,7 +14,8 @@ pub fn fits<'a>(
     must_be_flat: bool,
     config: &PrettifyConfig,
 ) -> bool {
-    let mut remainder = width;
+    // +1 used to produce the same results as Prettier
+    let mut remainder = width + 1;
     let mut remainder_index = rest_commands.len();
     let mut commands: Commands = vec![next.clone()];
     let mut out: Out = Vec::new();

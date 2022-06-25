@@ -43,6 +43,6 @@ pub fn process_line<'a>(
     } else {
         *pos -= trim(out);
         out.push(OutKind::String(NEW_LINE.to_string() + &indent.value));
-        *pos += indent.length;
+        *pos = indent.length;
     }
 }

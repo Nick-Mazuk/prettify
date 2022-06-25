@@ -1,4 +1,4 @@
-use super::super::doc::{Doc, DocOptions, PrettifyConfig};
+use super::super::doc::{Doc, DocCommand, DocOptions, PrettifyConfig};
 use super::fits::fits;
 use super::shared::{Command, Indent, LineSuffixes, Mode, PRINT_WIDTH};
 use std::borrow::Cow;
@@ -74,17 +74,20 @@ pub fn process_fill<'a>(
     }
 
     let mut cloned_contents = contents.clone();
-    cloned_contents.remove(0);
-    cloned_contents.remove(0);
+    let item_0 = cloned_contents.remove(0);
+    let item_1 = cloned_contents.remove(0);
     let remaining_command: Command = (
         indent.clone(),
         *mode,
-        Cow::Owned(Doc::Children(cloned_contents.clone())),
+        Cow::Owned(Doc::Command(DocCommand::Fill(
+            cloned_contents.clone(),
+            doc_options.clone(),
+        ))),
     );
     let first_and_second_content_flat_command: Command = (
         indent.clone(),
         Mode::Flat,
-        Cow::Owned(Doc::Children(cloned_contents)),
+        Cow::Owned(Doc::Children(vec![item_0, item_1])),
     );
     let first_and_second_content_fits = fits(
         &first_and_second_content_flat_command,
