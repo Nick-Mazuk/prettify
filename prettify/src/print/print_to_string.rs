@@ -181,7 +181,7 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                                     mode,
                                     Rc::new(Doc::Command(DocCommand::Fill(
                                         cloned_contents,
-                                        doc_options.clone(),
+                                        Rc::clone(doc_options),
                                     ))),
                                 );
 

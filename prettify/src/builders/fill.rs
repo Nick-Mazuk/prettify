@@ -4,10 +4,10 @@ use std::rc::Rc;
 pub fn fill(docs: Vec<Rc<Doc>>) -> Rc<Doc> {
     Rc::new(Doc::Command(DocCommand::Fill(
         docs,
-        DocOptions {
+        Rc::new(DocOptions {
             id: "",
             should_break: false,
             expanded_states: vec![],
-        },
+        }),
     )))
 }

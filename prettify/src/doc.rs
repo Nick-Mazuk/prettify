@@ -20,8 +20,8 @@ pub type Contents<'a> = Rc<Doc<'a>>;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum DocCommand<'a> {
-    Group(Contents<'a>, DocOptions<'a>),
-    Fill(Vec<Rc<Doc<'a>>>, DocOptions<'a>),
+    Group(Contents<'a>, Rc<DocOptions<'a>>),
+    Fill(Vec<Rc<Doc<'a>>>, Rc<DocOptions<'a>>),
     IfBreak(Contents<'a>, Contents<'a>, String),
     // IndentIfBreak(Contents, group_id, negate)
     IndentIfBreak(Contents<'a>, String, bool),
