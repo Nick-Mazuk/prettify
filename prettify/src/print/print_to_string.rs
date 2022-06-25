@@ -237,24 +237,25 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                         if line_mode == LineMode::Hard || line_mode == LineMode::HardLiteral {
                             should_remeasure = true;
                         }
-                        if !line_suffixes.is_empty() {
+                        if line_suffixes.is_empty() {
+                            if line_mode == LineMode::HardLiteral {
+                                out.push(OutKind::String(NEW_LINE.to_string()));
+                                pos = 0;
+                            } else {
+                                trim(&mut out);
+                                out.push(OutKind::String(NEW_LINE.to_string() + &indent.value));
+                                pos = indent.length;
+                            }
+                        } else {
                             commands.push((indent.clone(), mode, doc));
                             for suffix in line_suffixes.iter().rev() {
                                 commands.push((
                                     indent.clone(),
                                     mode,
-                                    Doc::Command(DocCommand::LineSuffix(suffix)),
+                                    Doc::String(suffix.to_string()),
                                 ));
                             }
                             line_suffixes.clear();
-                        }
-                        if line_mode == LineMode::HardLiteral {
-                            out.push(OutKind::String(NEW_LINE.to_string()));
-                            pos = 0;
-                        } else {
-                            trim(&mut out);
-                            out.push(OutKind::String(NEW_LINE.to_string() + &indent.value));
-                            pos = indent.length;
                         }
                     }
                 }
