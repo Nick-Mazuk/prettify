@@ -1,5 +1,6 @@
 extern crate regex;
 pub use builders::*;
+pub use doc::AlignAmount;
 use doc::{Doc, PrettifyConfig};
 
 mod builders;
