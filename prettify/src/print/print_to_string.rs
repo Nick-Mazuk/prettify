@@ -27,12 +27,8 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
     let mut line_suffixes: LineSuffixes<'a> = vec![];
     let mut group_mode_map: GroupModeMap = HashMap::new();
     let mut commands: Commands = vec![(root_indent(), Mode::Break, doc)];
-    let mut loop_count = 0;
 
     while !commands.is_empty() {
-        println!("loop_count: {}", loop_count);
-        loop_count += 1;
-        println!("commands: {:#?}\nout: {:#?}\n\n", commands, out);
         let (indent, mode, doc) = commands.pop().unwrap();
 
         match doc.clone() {
