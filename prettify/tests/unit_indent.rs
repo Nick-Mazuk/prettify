@@ -64,3 +64,55 @@ fn indents_array_only_when_wrapping_to_new_line() {
         "[item0, item1, item2, item3, item4]".to_string()
     );
 }
+
+#[test]
+fn nested_indents() {
+    let mut items = Vec::new();
+    for i in 0..12 {
+        items.push(string(format!("item{}", i)));
+    }
+    items.push(concat(vec![
+        string("["),
+        indent(concat(vec![
+            soft_line(),
+            join(
+                vec![string("itemA"), string("itemB")],
+                concat(vec![string(","), line()]),
+            ),
+            if_break(string(","), string(""), String::from("comma")),
+        ])),
+        soft_line(),
+        string("]"),
+    ]));
+    assert_eq!(
+        print(group(concat(vec![
+            string("["),
+            indent(concat(vec![
+                soft_line(),
+                join(items, concat(vec![string(","), line()])),
+                if_break(string(","), string(""), String::from("comma")),
+            ])),
+            soft_line(),
+            string("]"),
+        ]))),
+        indoc! {r#"
+            [
+                item0,
+                item1,
+                item2,
+                item3,
+                item4,
+                item5,
+                item6,
+                item7,
+                item8,
+                item9,
+                item10,
+                item11,
+                [
+                    itemA,
+                    itemB,
+                ],
+            ]"#}
+    );
+}
