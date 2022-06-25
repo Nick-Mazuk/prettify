@@ -3,7 +3,6 @@ use super::align::make_align;
 use super::indent::make_indent;
 use super::shared::{Command, Commands, Mode, Out, OutKind};
 use super::trim::trim;
-use std::borrow::{Borrow, Cow};
 
 pub fn fits<'a>(
     next: &Command<'a>,
@@ -31,9 +30,7 @@ pub fn fits<'a>(
         }
         let (indent, mode, doc) = commands.pop().unwrap();
 
-        let borrowed_doc: &Doc = doc.borrow();
-
-        match borrowed_doc.clone() {
+        match doc {
             Doc::String(string) => {
                 if string.len() > remainder {
                     return false;
@@ -65,15 +62,12 @@ pub fn fits<'a>(
                     } else {
                         Mode::Flat
                     };
-                    let new_contents = if !doc_options.expanded_states.is_empty()
-                        && group_mode == Mode::Break
-                    {
-                        Cow::Owned(
-                            (&options.expanded_states[options.expanded_states.len() - 1]).clone(),
-                        )
-                    } else {
-                        *contents
-                    };
+                    let new_contents =
+                        if !doc_options.expanded_states.is_empty() && group_mode == Mode::Break {
+                            (&options.expanded_states[options.expanded_states.len() - 1]).clone()
+                        } else {
+                            *contents
+                        };
                     commands.push((indent.clone(), group_mode, new_contents));
                 }
                 DocCommand::Fill(contents, _) => {

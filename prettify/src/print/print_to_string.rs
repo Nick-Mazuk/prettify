@@ -1,14 +1,13 @@
 use super::super::doc::{Doc, DocCommand, LineMode, PrettifyConfig};
 use super::align::make_align;
-use super::fill::process_fill;
-use super::group::process_group;
-use super::if_break::{process_if_break, process_indent_if_break};
+use super::fits::fits;
 use super::indent::make_indent;
-use super::line::process_line;
-use super::shared::{Commands, GroupModeMap, Indent, LineSuffixes, Mode, Out, OutKind};
+use super::shared::{
+    Command, Commands, GroupModeMap, Indent, LineSuffixes, Mode, Out, OutKind, NEW_LINE,
+    PRINT_WIDTH,
+};
 use super::trim::trim;
-use std::borrow::Borrow;
-use std::borrow::Cow;
+use crate::indent as build_indent;
 
 use std::collections::HashMap;
 
@@ -27,14 +26,16 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
     let mut out: Out = vec![];
     let mut line_suffixes: LineSuffixes<'a> = vec![];
     let mut group_mode_map: GroupModeMap = HashMap::new();
-    let mut commands: Commands = vec![(root_indent(), Mode::Break, Cow::Owned(doc))];
+    let mut commands: Commands = vec![(root_indent(), Mode::Break, doc)];
+    let mut loop_count = 0;
 
     while !commands.is_empty() {
+        println!("loop_count: {}", loop_count);
+        loop_count += 1;
+        println!("commands: {:#?}\nout: {:#?}\n\n", commands, out);
         let (indent, mode, doc) = commands.pop().unwrap();
 
-        let borrowed_doc: &Doc = doc.borrow();
-
-        match borrowed_doc.clone() {
+        match doc.clone() {
             Doc::String(string) => {
                 out.push(OutKind::String(string.to_string()));
                 pos += string.len();
@@ -55,70 +56,216 @@ pub fn print_to_string<'a>(doc: Doc<'a>, config: &PrettifyConfig) -> String {
                     pos -= trim(&mut out);
                 }
                 DocCommand::Group(contents, options) => {
-                    process_group(
-                        *contents,
-                        options,
-                        &mut commands,
-                        &mut line_suffixes,
-                        indent,
-                        &mode,
-                        &mut group_mode_map,
-                        &mut pos,
-                        &mut should_remeasure,
-                        config,
-                    );
+                    if mode == Mode::Flat && !should_remeasure {
+                        commands.push((
+                            indent.clone(),
+                            if options.should_break {
+                                Mode::Break
+                            } else {
+                                Mode::Flat
+                            },
+                            *contents.clone(),
+                        ));
+                    };
+                    should_remeasure = false;
+                    let mut next_mode = Mode::Flat;
+                    let next: Command = (indent.clone(), next_mode, *contents.clone());
+                    let remainder = PRINT_WIDTH - pos;
+                    let has_line_suffix = !line_suffixes.is_empty();
+                    let mut should_insert_into_map = true;
+                    if options.should_break || options.expanded_states.is_empty() {
+                        if !options.should_break
+                            && fits(
+                                &next,
+                                &commands,
+                                remainder,
+                                &options,
+                                has_line_suffix,
+                                false,
+                                config,
+                            )
+                        {
+                            commands.push(next);
+                        } else {
+                            should_remeasure = true;
+                            next_mode = Mode::Break;
+                            commands.push((indent, Mode::Break, *contents));
+                        }
+                    } else {
+                        let expanded_states = &options.expanded_states;
+                        for i in 0..options.expanded_states.len() {
+                            let option = expanded_states[i].clone();
+                            let command = (indent.clone(), next_mode, option);
+                            if fits(
+                                &command,
+                                &commands,
+                                remainder,
+                                &options,
+                                has_line_suffix,
+                                false,
+                                config,
+                            ) {
+                                commands.push(command);
+                                should_insert_into_map = false;
+                            }
+                        }
+                    }
+                    if should_insert_into_map {
+                        group_mode_map.insert(options.id, next_mode);
+                    }
                 }
                 DocCommand::Fill(contents, doc_options) => {
-                    process_fill(
-                        &mut commands,
-                        contents,
-                        &indent,
-                        &pos,
-                        &line_suffixes,
-                        &doc_options,
-                        &mode,
-                        config,
-                    );
+                    let remainder = PRINT_WIDTH - pos;
+                    if !contents.is_empty() {
+                        let content = &contents[0];
+                        let contents_command_flat: Command =
+                            (indent.clone(), Mode::Flat, content.clone());
+                        let contents_command_break: Command =
+                            (indent.clone(), Mode::Break, content.clone());
+                        let content_fits = fits(
+                            &contents_command_flat,
+                            &Vec::new(),
+                            remainder,
+                            &doc_options,
+                            !line_suffixes.is_empty(),
+                            true,
+                            config,
+                        );
+                        if contents.len() == 1 {
+                            if content_fits {
+                                commands.push(contents_command_flat);
+                            } else {
+                                commands.push(contents_command_break);
+                            }
+                        } else {
+                            let whitespace = &contents[1];
+                            let whitespace_command_flat: Command =
+                                (indent.clone(), Mode::Flat, whitespace.clone());
+                            let whitespace_command_break: Command =
+                                (indent.clone(), Mode::Break, whitespace.clone());
+
+                            if contents.len() == 2 {
+                                if content_fits {
+                                    commands.push(contents_command_flat);
+                                    commands.push(whitespace_command_flat);
+                                } else {
+                                    commands.push(contents_command_break);
+                                    commands.push(whitespace_command_break);
+                                }
+                            } else {
+                                let mut cloned_contents = contents.clone();
+                                let item_0 = cloned_contents.remove(0);
+                                let item_1 = cloned_contents.remove(0);
+                                let remaining_command: Command = (
+                                    indent.clone(),
+                                    mode,
+                                    Doc::Command(DocCommand::Fill(
+                                        cloned_contents.clone(),
+                                        doc_options.clone(),
+                                    )),
+                                );
+                                let first_and_second_content_flat_command: Command = (
+                                    indent.clone(),
+                                    Mode::Flat,
+                                    Doc::Children(vec![item_0, item_1]),
+                                );
+                                let first_and_second_content_fits = fits(
+                                    &first_and_second_content_flat_command,
+                                    &Vec::new(),
+                                    remainder,
+                                    &doc_options,
+                                    !line_suffixes.is_empty(),
+                                    true,
+                                    config,
+                                );
+
+                                commands.push(remaining_command);
+
+                                if first_and_second_content_fits {
+                                    commands.push(whitespace_command_flat);
+                                    commands.push(contents_command_flat);
+                                } else if content_fits {
+                                    commands.push(whitespace_command_break);
+                                    commands.push(contents_command_flat);
+                                } else {
+                                    commands.push(whitespace_command_break);
+                                    commands.push(contents_command_break);
+                                }
+                            }
+                        }
+                    }
                 }
                 DocCommand::IfBreak(break_contents, flat_contents, group_id) => {
-                    process_if_break(
-                        break_contents,
-                        flat_contents,
-                        group_id,
-                        &mode,
-                        &group_mode_map,
-                        indent,
-                        &mut commands,
-                    );
+                    let group_mode = match group_mode_map.get(&group_id as &str) {
+                        Some(mapped_mode) => mapped_mode,
+                        None => &mode,
+                    };
+                    match group_mode {
+                        Mode::Break => {
+                            commands.push((indent, mode, *break_contents));
+                        }
+                        Mode::Flat => {
+                            commands.push((indent, mode, *flat_contents));
+                        }
+                    }
                 }
-                DocCommand::IndentIfBreak(contents, group_id, negate) => process_indent_if_break(
-                    contents,
-                    group_id,
-                    negate,
-                    &mode,
-                    &group_mode_map,
-                    indent,
-                    &mut commands,
-                ),
+                DocCommand::IndentIfBreak(contents, group_id, negate) => {
+                    let group_mode = match group_mode_map.get(&group_id as &str) {
+                        Some(mapped_mode) => mapped_mode,
+                        None => &mode,
+                    };
+                    match group_mode {
+                        Mode::Break => {
+                            if negate {
+                                commands.push((indent, mode, *contents));
+                            } else {
+                                commands.push((indent, mode, build_indent(*contents)));
+                            }
+                        }
+                        Mode::Flat => {
+                            if negate {
+                                commands.push((indent, mode, build_indent(*contents)));
+                            } else {
+                                commands.push((indent, mode, *contents));
+                            }
+                        }
+                    }
+                }
                 DocCommand::LineSuffix(contents) => {
                     line_suffixes.push(contents);
                 }
-                DocCommand::LineSuffixBoundary => commands.push((
-                    indent,
-                    mode,
-                    Cow::Owned(Doc::Command(DocCommand::Line(LineMode::Hard))),
-                )),
-                DocCommand::Line(line_mode) => process_line(
-                    line_mode,
-                    &mode,
-                    &mut out,
-                    &mut pos,
-                    &mut should_remeasure,
-                    &mut line_suffixes,
-                    &mut commands,
-                    indent,
-                    doc,
-                ),
+                DocCommand::LineSuffixBoundary => {
+                    commands.push((indent, mode, Doc::Command(DocCommand::Line(LineMode::Hard))))
+                }
+                DocCommand::Line(line_mode) => {
+                    if mode == Mode::Flat && line_mode == LineMode::Auto {
+                        out.push(OutKind::String(String::from(" ")));
+                        pos += 1;
+                    } else if mode != Mode::Flat || line_mode != LineMode::Soft {
+                        if line_mode == LineMode::Hard || line_mode == LineMode::HardLiteral {
+                            should_remeasure = true;
+                        }
+                        if !line_suffixes.is_empty() {
+                            commands.push((indent.clone(), mode.clone(), doc));
+                            for suffix in line_suffixes.clone().into_iter().rev() {
+                                commands.push((
+                                    indent.clone(),
+                                    mode.clone(),
+                                    Doc::Command(DocCommand::LineSuffix(suffix)),
+                                ));
+                            }
+                            line_suffixes.clear();
+                        }
+                        if line_mode == LineMode::HardLiteral {
+                            out.push(OutKind::String(NEW_LINE.to_string()));
+                            pos = 0;
+                        } else {
+                            trim(&mut out);
+                            out.push(OutKind::String(NEW_LINE.to_string() + &indent.value));
+                            pos = indent.length;
+                        }
+                    }
+                }
                 DocCommand::Cursor => {
                     out.push(OutKind::Cursor);
                 }

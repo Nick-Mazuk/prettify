@@ -1,13 +1,12 @@
 use super::super::doc::Doc;
-use std::borrow::Cow;
 
 pub fn join<'a>(docs: Vec<Doc<'a>>, separator: Doc<'a>) -> Doc<'a> {
-    let mut children: Vec<Cow<'a, Doc<'a>>> = Vec::new();
+    let mut children: Vec<Doc<'a>> = Vec::new();
     for (index, doc) in docs.into_iter().enumerate() {
         if index != 0 {
-            children.push(Cow::Owned(separator.clone()));
+            children.push(separator.clone());
         }
-        children.push(Cow::Owned(doc))
+        children.push(doc)
     }
     Doc::Children(children)
 }

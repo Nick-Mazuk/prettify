@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 #[derive(PartialEq, Debug, Clone)]
 pub enum LineMode {
     Hard,
@@ -16,12 +14,12 @@ pub enum AlignAmount {
     Dedent,
 }
 
-pub type Contents<'a> = Box<Cow<'a, Doc<'a>>>;
+pub type Contents<'a> = Box<Doc<'a>>;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum DocCommand<'a> {
-    Group(Contents<'a>, Cow<'a, DocOptions<'a>>),
-    Fill(Vec<Cow<'a, Doc<'a>>>, DocOptions<'a>),
+    Group(Contents<'a>, DocOptions<'a>),
+    Fill(Vec<Doc<'a>>, DocOptions<'a>),
     IfBreak(Contents<'a>, Contents<'a>, String),
     // IndentIfBreak(Contents, group_id, negate)
     IndentIfBreak(Contents<'a>, String, bool),
@@ -48,7 +46,7 @@ pub struct DocOptions<'a> {
 #[derive(PartialEq, Debug, Clone)]
 pub enum Doc<'a> {
     String(String),
-    Children(Vec<Cow<'a, Doc<'a>>>),
+    Children(Vec<Doc<'a>>),
     Command(DocCommand<'a>),
 }
 

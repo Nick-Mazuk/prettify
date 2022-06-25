@@ -1,8 +1,7 @@
 use super::super::doc::{AlignAmount, Doc, DocCommand};
-use std::borrow::Cow;
 
 pub fn align(contents: Doc, amount: AlignAmount) -> Doc {
-    Doc::Command(DocCommand::Align(Box::new(Cow::Owned(contents)), amount))
+    Doc::Command(DocCommand::Align(Box::new(contents), amount))
 }
 
 pub fn add_alignment_to_doc(doc: Doc, size: usize, tab_width: usize) -> Doc {
