@@ -1,4 +1,4 @@
-use prettify::{concat, group, hard_line, line_suffix, print, string};
+use prettify::{concat, group, hard_line, line_suffix, line_suffix_boundary, print, string};
 
 #[test]
 fn line_suffix_command() {
@@ -39,5 +39,32 @@ fn separated_line_suffixes() {
             hard_line()
         ]))),
         "a; // comment\n".to_string()
+    );
+}
+
+#[test]
+fn with_boundary() {
+    assert_eq!(
+        print(group(concat(vec![
+            string("{"),
+            line_suffix(" // comment"),
+            line_suffix_boundary(),
+            string("}"),
+            hard_line()
+        ]))),
+        "{ // comment\n}\n".to_string()
+    );
+}
+
+#[test]
+fn suffixes_always_flushed_even_without_a_newline() {
+    assert_eq!(
+        print(group(concat(vec![
+            string("{"),
+            line_suffix(" // comment"),
+            line_suffix_boundary(),
+            string("}"),
+        ]))),
+        "{ // comment\n}".to_string()
     );
 }
