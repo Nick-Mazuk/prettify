@@ -2,12 +2,11 @@ extern crate prettify;
 
 mod format;
 mod nodes;
+mod parse;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
+use format::create_prettify_doc;
+use parse::parse_markdown;
+
+pub fn format_markdown<'a>(markdown: &str) -> prettify::PrettifyDoc<'a> {
+    create_prettify_doc(parse_markdown(markdown))
 }

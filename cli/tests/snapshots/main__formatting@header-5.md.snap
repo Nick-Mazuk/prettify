@@ -1,0 +1,7 @@
+---
+source: cli/tests/main.rs
+expression: formatted
+input_file: cli/tests/files/markdown/header-5.md
+---
+# Hello world
+

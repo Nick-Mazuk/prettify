@@ -1,7 +1,6 @@
 #[derive(PartialEq, Debug, Clone)]
 pub enum Node {
-    String(String),
-    Heading(usize, Vec<Leaf>),
+    Header(usize, Vec<Leaf>),
     Paragraph(Vec<Leaf>),
 }
 
