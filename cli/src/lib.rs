@@ -42,3 +42,31 @@ pub fn get_elapsed_string(elapsed: Duration) -> String {
         )
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn get_elapsed_string_test() {
+        assert_eq!(
+            get_elapsed_string(Duration::from_micros(1)),
+            "1 microsecond"
+        );
+        assert_eq!(
+            get_elapsed_string(Duration::from_micros(2)),
+            "2 microseconds"
+        );
+        assert_eq!(
+            get_elapsed_string(Duration::from_millis(1)),
+            "1 millisecond"
+        );
+        assert_eq!(
+            get_elapsed_string(Duration::from_millis(2)),
+            "2 milliseconds"
+        );
+        assert_eq!(get_elapsed_string(Duration::from_millis(1000)), "1 second");
+        assert_eq!(get_elapsed_string(Duration::from_millis(1111)), "1 second");
+        assert_eq!(get_elapsed_string(Duration::from_millis(2000)), "2 seconds");
+    }
+}
