@@ -1,14 +1,5 @@
 use crate::nodes::{Leaf, Leaves};
-use nom::{
-    branch::alt,
-    bytes::complete::take_until,
-    combinator::{eof, peek, rest},
-    sequence::terminated,
-};
-
-use super::block::block_end;
-
-// use super::block::block_end;
+use nom::{branch::alt, bytes::complete::take_until, combinator::rest};
 
 pub fn leaves(input: &str) -> nom::IResult<&str, Leaves> {
     let result = string(input);

@@ -8,9 +8,13 @@ pub enum Language {
 }
 
 pub fn format_by_language(contents: &str, language: Language) -> String {
-    print(match language {
+    let doc = match language {
         Language::Markdown => format_markdown(contents),
-    })
+    };
+    match doc {
+        Ok(doc) => print(doc),
+        Err(_) => contents.to_string(),
+    }
 }
 
 pub fn get_language_from_filename(filename: &str) -> Option<Language> {

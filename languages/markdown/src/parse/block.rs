@@ -7,9 +7,6 @@ use nom::{
     multi::many0,
     sequence::{terminated, tuple},
 };
-use regex::Regex;
-
-pub type ParsedBlocks<'a> = Vec<nom::IResult<&'a str, Block>>;
 
 pub fn parse_blocks(input: &str) -> nom::IResult<&str, Vec<Block>> {
     many0(block)(input)
