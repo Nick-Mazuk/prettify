@@ -12,7 +12,7 @@ use std::time::Instant;
 fn main() {
     let start_time = Instant::now();
     let args: Vec<String> = env::args().collect();
-    let glob_pattern_index = if cfg!(debug_assertions) || args[1] == "cli" {
+    let glob_pattern_index = if cfg!(debug_assertions) || args[1] == "prettify-cli" {
         2
     } else {
         1
