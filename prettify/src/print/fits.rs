@@ -41,7 +41,7 @@ pub fn fits<'a>(
                 remainder -= string.len();
             }
             Doc::Children(children) => {
-                for child in children.into_iter().rev() {
+                for child in children.iter().rev() {
                     commands.push((Rc::clone(&indent), mode, Rc::clone(child)));
                 }
             }
@@ -81,7 +81,7 @@ pub fn fits<'a>(
                     commands.push((indent, group_mode, Rc::clone(&new_contents)));
                 }
                 DocCommand::Fill(contents, _) => {
-                    for child in contents.into_iter().rev() {
+                    for child in contents.iter().rev() {
                         commands.push((Rc::clone(&indent), mode, Rc::clone(child)));
                     }
                 }

@@ -2,10 +2,7 @@ use super::super::nodes::{Leaf, Leaves};
 use prettify::{join, string, PrettifyDoc};
 
 pub fn format_leaves<'a>(leaves: Leaves) -> PrettifyDoc<'a> {
-    join(
-        leaves.into_iter().map(|leaf| format_leaf(leaf)).collect(),
-        string(" "),
-    )
+    join(leaves.into_iter().map(format_leaf).collect(), string(" "))
 }
 
 pub fn format_leaf<'a>(leaf: Leaf) -> PrettifyDoc<'a> {

@@ -44,19 +44,19 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                 pos += string.len();
             }
             Doc::Children(children) => {
-                for child in children.into_iter().rev() {
+                for child in children.iter().rev() {
                     commands.push((Rc::clone(&indent), mode, Rc::clone(child)));
                 }
             }
             Doc::Command(command) => match command {
                 DocCommand::Indent(contents) => {
-                    commands.push((make_indent(indent, config), mode, Rc::clone(&contents)));
+                    commands.push((make_indent(indent, config), mode, Rc::clone(contents)));
                 }
                 DocCommand::Align(contents, width) => {
                     commands.push((
                         make_align(indent, width.clone(), config),
                         mode,
-                        Rc::clone(&contents),
+                        Rc::clone(contents),
                     ));
                 }
                 DocCommand::Trim => {
@@ -71,12 +71,12 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                             } else {
                                 Mode::Flat
                             },
-                            Rc::clone(&contents),
+                            Rc::clone(contents),
                         ));
                     };
                     should_remeasure = false;
                     let mut next_mode = Mode::Flat;
-                    let next: Command = (Rc::clone(&indent), next_mode, Rc::clone(&contents));
+                    let next: Command = (Rc::clone(&indent), next_mode, Rc::clone(contents));
                     let remainder = PRINT_WIDTH - pos;
                     let has_line_suffix = !line_suffixes.is_empty();
                     let mut should_insert_into_map = true;
@@ -86,7 +86,7 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                                 &next,
                                 &commands,
                                 remainder,
-                                &options,
+                                options,
                                 has_line_suffix,
                                 false,
                                 config,
@@ -96,7 +96,7 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                         } else {
                             should_remeasure = true;
                             next_mode = Mode::Break;
-                            commands.push((indent, Mode::Break, Rc::clone(&contents)));
+                            commands.push((indent, Mode::Break, Rc::clone(contents)));
                         }
                     } else {
                         let expanded_states = &options.expanded_states;
@@ -106,7 +106,7 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                                 &command,
                                 &commands,
                                 remainder,
-                                &options,
+                                options,
                                 has_line_suffix,
                                 false,
                                 config,
@@ -132,7 +132,7 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                             &contents_command_flat,
                             &Vec::new(),
                             remainder,
-                            &doc_options,
+                            doc_options,
                             !line_suffixes.is_empty(),
                             true,
                             config,
@@ -171,7 +171,7 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                                     &first_and_second_content_flat_command,
                                     &Vec::new(),
                                     remainder,
-                                    &doc_options,
+                                    doc_options,
                                     !line_suffixes.is_empty(),
                                     true,
                                     config,
@@ -202,28 +202,28 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                     }
                 }
                 DocCommand::IfBreak(break_contents, flat_contents, group_id) => {
-                    let group_mode = match group_mode_map.get(&group_id as &str) {
+                    let group_mode = match group_mode_map.get(group_id as &str) {
                         Some(mapped_mode) => mapped_mode,
                         None => &mode,
                     };
                     match group_mode {
                         Mode::Break => {
-                            commands.push((indent, mode, Rc::clone(&break_contents)));
+                            commands.push((indent, mode, Rc::clone(break_contents)));
                         }
                         Mode::Flat => {
-                            commands.push((indent, mode, Rc::clone(&flat_contents)));
+                            commands.push((indent, mode, Rc::clone(flat_contents)));
                         }
                     }
                 }
                 DocCommand::IndentIfBreak(contents, group_id, negate) => {
-                    let group_mode = match group_mode_map.get(&group_id as &str) {
+                    let group_mode = match group_mode_map.get(group_id as &str) {
                         Some(mapped_mode) => mapped_mode,
                         None => &mode,
                     };
                     match group_mode {
                         Mode::Break => {
                             if *negate {
-                                commands.push((indent, mode, Rc::clone(&contents)));
+                                commands.push((indent, mode, Rc::clone(contents)));
                             } else {
                                 commands.push((indent, mode, build_indent(Rc::clone(contents))));
                             }
@@ -232,7 +232,7 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                             if *negate {
                                 commands.push((indent, mode, build_indent(Rc::clone(contents))));
                             } else {
-                                commands.push((indent, mode, Rc::clone(&contents)));
+                                commands.push((indent, mode, Rc::clone(contents)));
                             }
                         }
                     }
