@@ -1,7 +1,8 @@
 use super::super::doc::{Doc, DocCommand, DocOptions};
+use crate::PrettifyDoc;
 use std::rc::Rc;
 
-pub fn group(doc: Rc<Doc>) -> Rc<Doc> {
+pub fn group(doc: PrettifyDoc) -> PrettifyDoc {
     group_with_options(
         doc,
         DocOptions {
@@ -12,11 +13,11 @@ pub fn group(doc: Rc<Doc>) -> Rc<Doc> {
     )
 }
 
-pub fn group_with_options<'a>(doc: Rc<Doc<'a>>, options: DocOptions<'a>) -> Rc<Doc<'a>> {
+pub fn group_with_options<'a>(doc: PrettifyDoc<'a>, options: DocOptions<'a>) -> PrettifyDoc<'a> {
     Rc::new(Doc::Command(DocCommand::Group(doc, Rc::new(options))))
 }
 
-pub fn conditional_group<'a>(docs: Vec<Rc<Doc<'a>>>, id: &'a str) -> Rc<Doc<'a>> {
+pub fn conditional_group<'a>(docs: Vec<PrettifyDoc<'a>>, id: &'a str) -> PrettifyDoc<'a> {
     if docs.is_empty() {
         panic!("conditional_group requires at least one doc");
     }

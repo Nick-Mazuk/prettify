@@ -1,11 +1,11 @@
-use super::super::doc::{AlignAmount, Doc};
+use super::super::doc::AlignAmount;
 use super::align::align;
-use std::rc::Rc;
+use crate::PrettifyDoc;
 
-pub fn dedent_to_root(doc: Rc<Doc>) -> Rc<Doc> {
+pub fn dedent_to_root(doc: PrettifyDoc) -> PrettifyDoc {
     align(doc, AlignAmount::DedentToRoot)
 }
 
-pub fn dedent(doc: Rc<Doc>) -> Rc<Doc> {
+pub fn dedent(doc: PrettifyDoc) -> PrettifyDoc {
     align(doc, AlignAmount::Dedent)
 }

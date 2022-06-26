@@ -12,6 +12,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "cli"
+version = "0.1.0"
+
+[[package]]
 name = "indoc"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -29,6 +33,13 @@ version = "0.1.0"
 dependencies = [
  "indoc",
  "regex",
+]
+
+[[package]]
+name = "prettify-markdown"
+version = "0.1.0"
+dependencies = [
+ "prettify",
 ]
 
 [[package]]

@@ -9,6 +9,7 @@ mod doc;
 mod print;
 
 pub const PRETTIFY_DEFAULT_CONFIG: PrettifyConfig = PrettifyConfig { tab_width: 4 };
+pub type PrettifyDoc<'a> = Rc<Doc<'a>>;
 
 pub fn print(doc: Rc<Doc>) -> String {
     print::print_to_string(doc, &PRETTIFY_DEFAULT_CONFIG)

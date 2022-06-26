@@ -26,13 +26,13 @@ pub fn generate_indent(
     for item in &queue {
         match &item.kind {
             Some(IndentKind::Indent) => {
-                add_spaces(&mut value, config.tab_width);
+                value.push_str(&" ".repeat(config.tab_width));
             }
             Some(IndentKind::StringAlign(text)) => {
                 value.push_str(text);
             }
             Some(IndentKind::NumberAlign(width)) => {
-                add_spaces(&mut value, *width);
+                value.push_str(&" ".repeat(*width));
             }
             Some(IndentKind::Dedent) | None => {
                 panic!("Unexpected indent kind");
@@ -60,11 +60,5 @@ fn generate_initial_queue(indent: &Indent, new_indent: Rc<Indent>) -> Vec<Rc<Ind
             cloned_queue.push(new_indent);
             cloned_queue
         }
-    }
-}
-
-fn add_spaces(value: &mut String, count: usize) {
-    for _ in 0..count {
-        value.push(' ');
     }
 }

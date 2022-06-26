@@ -1,6 +1,7 @@
 use super::super::doc::{Doc, DocCommand};
+use crate::PrettifyDoc;
 use std::rc::Rc;
 
-pub fn indent(doc: Rc<Doc>) -> Rc<Doc> {
+pub fn indent(doc: PrettifyDoc) -> PrettifyDoc {
     Rc::new(Doc::Command(DocCommand::Indent(doc)))
 }
