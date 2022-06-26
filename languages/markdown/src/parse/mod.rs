@@ -4,6 +4,7 @@ use super::nodes::Block;
 mod block;
 mod header;
 mod leaf;
+mod paragraph;
 
 pub fn parse_markdown(markdown: &str) -> nom::IResult<&str, Vec<Block>> {
     // let blocks_results = parse_blocks(markdown);

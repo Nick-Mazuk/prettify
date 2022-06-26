@@ -1,4 +1,4 @@
-use super::header::header;
+use super::{header::header, paragraph::paragraph};
 use crate::nodes::Block;
 use nom::{
     branch::alt,
@@ -13,7 +13,7 @@ pub fn parse_blocks(input: &str) -> nom::IResult<&str, Vec<Block>> {
 }
 
 pub fn block(input: &str) -> nom::IResult<&str, Block> {
-    terminated(alt((header, header)), block_end)(input)
+    terminated(alt((header, paragraph)), block_end)(input)
 }
 
 pub fn block_end(input: &str) -> nom::IResult<&str, &str> {
