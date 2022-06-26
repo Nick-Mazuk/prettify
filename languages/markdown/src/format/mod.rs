@@ -11,6 +11,7 @@ pub fn create_prettify_doc<'a>(nodes: Vec<Block>) -> PrettifyDoc<'a> {
             .map(|node| match node {
                 Block::Header(size, leaves) => header::format_header(size, leaves),
                 Block::Paragraph(leaves) => leaf::format_leaves(leaves),
+                Block::EmptyLine => hard_line(),
             })
             .collect(),
         hard_line(),

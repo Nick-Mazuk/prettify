@@ -1,6 +1,5 @@
-use crate::nodes::Block;
-
 use super::leaf::leaves;
+use crate::nodes::Block;
 
 pub fn paragraph(input: &str) -> nom::IResult<&str, Block> {
     let result = leaves(input);

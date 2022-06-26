@@ -2,6 +2,7 @@ use self::block::parse_blocks;
 use super::nodes::Block;
 
 mod block;
+mod empty_line;
 mod header;
 mod leaf;
 mod paragraph;

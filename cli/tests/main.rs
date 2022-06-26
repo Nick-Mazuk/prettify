@@ -12,11 +12,16 @@ pub fn format_file(file_name: &str, contents: &str) -> String {
 fn test_formatting() {
     let header = indoc::indoc! {r#"
     |                                                                              | printWidth
-    =====================================input======================================
+    ----------------------------------start input-----------------------------------
+    "#};
+    let footer = indoc::indoc! {r#"
+    -----------------------------------end input------------------------------------
+    |                                                                              | printWidth
     "#};
     insta::glob!("files/**/*.*", |path| {
         let contents = std::fs::read_to_string(path).unwrap();
         let formatted = format_file(path.file_name().unwrap().to_str().unwrap(), &contents);
-        insta::assert_snapshot!(format!("{}{}", header, formatted));
+        let file = format!("{}{}{}", header, formatted, footer);
+        insta::assert_snapshot!(file);
     });
 }

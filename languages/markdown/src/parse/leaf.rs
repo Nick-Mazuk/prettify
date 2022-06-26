@@ -27,5 +27,9 @@ mod tests {
             leaves("hello world"),
             Ok(("", vec![Leaf::String("hello world".to_string())]))
         );
+        assert_eq!(
+            leaves("hello world\n"),
+            Ok(("\n", vec![Leaf::String("hello world".to_string())]))
+        );
     }
 }

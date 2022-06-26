@@ -9,3 +9,4 @@ edition = "2021"
 prettify = { path = "../../prettify" }
 nom = "7"
 regex = "1"
+comrak = "0.13.1"

@@ -1,11 +1,9 @@
+use super::leaf::leaves;
+use crate::nodes::Block;
 use nom::bytes::complete::tag;
 use nom::character::complete::space1;
 use nom::multi::many1;
 use nom::sequence::tuple;
-
-use crate::nodes::Block;
-
-use super::leaf::leaves;
 
 pub fn header(input: &str) -> nom::IResult<&str, Block> {
     let result = tuple((many1(tag("#")), space1, leaves))(input);

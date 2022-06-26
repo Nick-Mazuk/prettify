@@ -2,6 +2,7 @@
 pub enum Block {
     Header(usize, Vec<Leaf>),
     Paragraph(Vec<Leaf>),
+    EmptyLine,
 }
 
 #[derive(PartialEq, Debug, Clone)]
