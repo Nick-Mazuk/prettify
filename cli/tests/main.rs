@@ -1,4 +1,4 @@
-use cli::{format_by_language, get_language_from_filename};
+use prettify_cli::{format_by_language, get_language_from_filename};
 
 pub fn format_file(file_name: &str, contents: &str) -> String {
     let language = get_language_from_filename(file_name);

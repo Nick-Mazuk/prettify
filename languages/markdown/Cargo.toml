@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 prettify = { path = "../../prettify" }
+nom = "7"
+regex = "1"

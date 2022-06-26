@@ -22,6 +22,7 @@ fn main() {
         Some(path) => path,
         None => default_glob_pattern,
     };
+    print!("\nFormatting files matching {}\n", glob_pattern);
     let files = match glob(glob_pattern) {
         Ok(files) => files,
         Err(e) => panic!("Error: {}", e),

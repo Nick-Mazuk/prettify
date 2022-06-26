@@ -3,5 +3,5 @@ source: cli/tests/main.rs
 expression: formatted
 input_file: cli/tests/files/markdown/header-2.md
 ---
-# Hello world
+## Hello world
 
