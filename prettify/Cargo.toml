@@ -8,4 +8,6 @@ readme = "README.md"
 
 [dependencies]
 regex = "1"
+
+[dev-dependencies]
 indoc = "1.0"

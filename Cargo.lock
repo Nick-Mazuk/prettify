@@ -182,6 +182,7 @@ name = "prettify-cli"
 version = "0.1.0"
 dependencies = [
  "glob",
+ "indoc",
  "insta",
  "prettify",
  "prettify-markdown",

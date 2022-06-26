@@ -1,7 +1,9 @@
 ---
 source: cli/tests/main.rs
-expression: formatted
-input_file: cli/tests/files/markdown/header-5.md
+expression: "format!(\"{}{}\", header, formatted)"
+input_file: cli/tests/files/markdown/heading/header-5.md
 ---
+|                                                                              | printWidth
+=====================================input======================================
 ##### Hello world
 

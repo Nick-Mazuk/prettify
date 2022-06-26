@@ -10,9 +10,13 @@ pub fn format_file(file_name: &str, contents: &str) -> String {
 
 #[test]
 fn test_formatting() {
+    let header = indoc::indoc! {r#"
+    |                                                                              | printWidth
+    =====================================input======================================
+    "#};
     insta::glob!("files/**/*.*", |path| {
         let contents = std::fs::read_to_string(path).unwrap();
         let formatted = format_file(path.file_name().unwrap().to_str().unwrap(), &contents);
-        insta::assert_snapshot!(formatted);
+        insta::assert_snapshot!(format!("{}{}", header, formatted));
     });
 }

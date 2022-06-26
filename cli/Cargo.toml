@@ -12,3 +12,4 @@ glob = "0.3.0"
 
 [dev-dependencies]
 insta = { version = "1.15", features = ["glob"] }
+indoc = "1.0"
