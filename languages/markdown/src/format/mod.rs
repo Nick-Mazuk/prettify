@@ -1,17 +1,20 @@
+use crate::nodes::LeafBlock;
+
 use super::nodes::Block;
-use prettify::{group, hard_line, join, PrettifyDoc};
+use prettify::{concat, group, hard_line, join, string, PrettifyDoc};
 
 mod header;
-mod leaf;
+// mod leaf;
 
-pub fn create_prettify_doc<'a>(nodes: Vec<Block>) -> PrettifyDoc<'a> {
+pub fn create_prettify_doc<'a>(nodes: Vec<Block<'a>>) -> PrettifyDoc<'a> {
     group(join(
         nodes
             .into_iter()
             .map(|node| match node {
-                Block::Header(size, leaves) => header::format_header(size, leaves),
-                Block::Paragraph(leaves) => leaf::format_leaves(leaves),
-                Block::EmptyLine => hard_line(),
+                Block::Leaf(LeafBlock::Heading(size, content)) => {
+                    header::format_header(size, content)
+                }
+                Block::Leaf(LeafBlock::ThematicBreak) => concat(vec![string("---"), hard_line()]),
             })
             .collect(),
         hard_line(),

@@ -21,7 +21,7 @@ fn test_formatting() {
     insta::glob!("files/**/*.*", |path| {
         let contents = std::fs::read_to_string(path).unwrap();
         let formatted = format_file(path.file_name().unwrap().to_str().unwrap(), &contents);
-        let file = format!("{}{}{}", header, formatted, footer);
+        let file = format!("{}{}\n{}", header, formatted, footer);
         insta::assert_snapshot!(file);
     });
 }

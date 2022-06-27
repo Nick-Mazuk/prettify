@@ -1,21 +1,24 @@
-use self::block::parse_blocks;
+use self::leaf_blocks::{atx_heading, thematic_break};
 use super::nodes::Block;
+use nom::{branch::alt, multi::many0};
 
-mod block;
-mod empty_line;
-mod header;
-mod leaf;
-mod paragraph;
+// mod block;
+// mod empty_line;
+// mod header;
+mod helpers;
+// mod leaf;
+mod leaf_blocks;
+// mod paragraph;
+mod preliminaries;
 
-pub fn parse_markdown(markdown: &str) -> nom::IResult<&str, Vec<Block>> {
-    // let blocks_results = parse_blocks(markdown);
-    // let mut blocks: Vec<Block> = Vec::new();
-    // for block_result in blocks_results {
-    //     match block_result {
-    //         Ok((_, block)) => blocks.push(block),
-    //         Err(error) => println!("{}", error),
-    //     }
-    // }
-    // blocks
-    parse_blocks(markdown)
+fn leaf_block_as_block(input: &str) -> nom::IResult<&str, Block> {
+    let result = alt((atx_heading, thematic_break))(input);
+    match result {
+        Ok((remainder, block)) => Ok((remainder, Block::Leaf(block))),
+        Err(error) => Err(error),
+    }
+}
+
+pub fn parse_markdown<'a>(markdown: &'a str) -> nom::IResult<&'a str, Vec<Block<'a>>> {
+    many0(leaf_block_as_block)(markdown)
 }
