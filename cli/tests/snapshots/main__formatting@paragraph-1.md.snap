@@ -5,6 +5,7 @@ input_file: cli/tests/files/markdown/paragraph/paragraph-1.md
 ---
 |                                                                              | printWidth
 ----------------------------------start input-----------------------------------
+I am a paragraph.
 
 -----------------------------------end input------------------------------------
 |                                                                              | printWidth
