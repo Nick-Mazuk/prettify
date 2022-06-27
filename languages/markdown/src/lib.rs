@@ -8,6 +8,7 @@ use format::create_prettify_doc;
 use parse::parse_markdown;
 
 pub fn format_markdown<'a>(markdown: &'a str) -> Result<prettify::PrettifyDoc<'a>, &'a str> {
+    let result = parse_markdown(markdown);
     match parse_markdown(markdown) {
         Ok((_, nodes)) => Ok(create_prettify_doc(nodes)),
         Err(_) => Err("Invalid markdown"),

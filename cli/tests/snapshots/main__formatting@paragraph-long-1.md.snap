@@ -1,0 +1,21 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/paragraph/paragraph-long-1.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
+ut labore et dolore magna aliqua. Fames ac turpis egestas integer eget aliquet. In
+hac habitasse platea dictumst vestibulum rhoncus est pellentesque elit. Maecenas
+volutpat blandit aliquam etiam erat velit scelerisque in dictum. Mauris cursus mattis
+molestie a iaculis at erat pellentesque adipiscing. Vitae suscipit tellus mauris
+a diam. Vitae congue eu consequat ac felis donec et. Porta lorem mollis aliquam ut.
+Quam elementum pulvinar etiam non quam lacus suspendisse faucibus interdum. In tellus
+integer feugiat scelerisque varius morbi. Amet nisl suscipit adipiscing bibendum
+est ultricies integer. Molestie at elementum eu facilisis sed odio morbi. Metus aliquam
+eleifend mi in nulla posuere sollicitudin. Et tortor consequat id porta.
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

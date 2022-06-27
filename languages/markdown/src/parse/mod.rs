@@ -1,6 +1,10 @@
 use self::leaf_blocks::{atx_heading, paragraph, thematic_break};
 use super::nodes::Block;
-use nom::{branch::alt, multi::many0};
+use nom::{
+    branch::alt,
+    combinator::eof,
+    multi::{many0, many_till},
+};
 
 // mod block;
 // mod empty_line;
@@ -20,5 +24,9 @@ fn leaf_block_as_block(input: &str) -> nom::IResult<&str, Block> {
 }
 
 pub fn parse_markdown<'a>(markdown: &'a str) -> nom::IResult<&'a str, Vec<Block<'a>>> {
-    many0(leaf_block_as_block)(markdown)
+    let result = many_till(leaf_block_as_block, eof)(markdown);
+    match result {
+        Ok((remainder, (blocks, _))) => Ok((remainder, blocks)),
+        Err(error) => Err(error),
+    }
 }
