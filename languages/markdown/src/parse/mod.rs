@@ -1,4 +1,4 @@
-use self::leaf_blocks::{atx_heading, paragraph, thematic_break};
+use self::leaf_blocks::{atx_heading, blank_line, paragraph, thematic_break};
 use super::nodes::Block;
 use nom::{branch::alt, combinator::eof, multi::many_till};
 
@@ -12,7 +12,7 @@ mod leaf_blocks;
 mod preliminaries;
 
 fn leaf_block_as_block(input: &str) -> nom::IResult<&str, Block> {
-    let result = alt((atx_heading, thematic_break, paragraph))(input);
+    let result = alt((blank_line, atx_heading, thematic_break, paragraph))(input);
     match result {
         Ok((remainder, block)) => Ok((remainder, Block::Leaf(block))),
         Err(error) => Err(error),
