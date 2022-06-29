@@ -17,4 +17,4 @@ fn prettify_markdown(file_contents: &str) -> String {
 }
 ```
 
-> Note: this crate is in very early alpha. Most features of Markdown are not supported at this time.
+> Note: this crate is in very early alpha. Most features of Markdown are not supported at this time. This library will eventually support all features of [GitHub flavored Markdown](https://github.github.com/gfm).
