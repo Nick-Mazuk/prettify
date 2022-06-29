@@ -5,6 +5,9 @@ input_file: cli/tests/files/markdown/integration/heading-paragraph.md
 ---
 |                                                                              | printWidth
 ----------------------------------start input-----------------------------------
+# I am a heading 1
+
+I'm a paragraph immediately after the heading that needs space.
 
 -----------------------------------end input------------------------------------
 |                                                                              | printWidth

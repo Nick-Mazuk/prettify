@@ -1,8 +1,9 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_till, take_till1},
-    combinator::{eof, recognize, rest},
-    multi::{many0, many1},
+    character::complete::anychar,
+    combinator::{eof, peek, recognize, rest},
+    multi::{many0, many1, many_till},
     sequence::terminated,
 };
 
@@ -64,4 +65,32 @@ pub fn space0(input: &str) -> nom::IResult<&str, &str> {
 
 pub fn space1(input: &str) -> nom::IResult<&str, &str> {
     recognize(many1(tag(SPACE_STR)))(input)
+}
+
+pub fn any_until_line_ending(input: &str) -> nom::IResult<&str, &str> {
+    recognize(many_till(anychar, peek(line_ending)))(input)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn line_ending_test() {
+        assert_eq!(line_ending("\n"), Ok(("", "\n")));
+        assert_eq!(line_ending("\n\n"), Ok(("\n", "\n")));
+        assert_eq!(line_ending("\n\nhello"), Ok(("\nhello", "\n")));
+        assert_eq!(line_ending("\n"), Ok(("", "\n")));
+        assert_eq!(line_ending("\nhello"), Ok(("hello", "\n")));
+
+        // only matches a 0 line breaks if it's the end of the file
+        assert_eq!(line_ending(""), Ok(("", "")));
+        assert_eq!(
+            line_ending("hello"),
+            Err(nom::Err::Error(nom::error::Error {
+                input: "hello",
+                code: nom::error::ErrorKind::Eof,
+            }))
+        );
+    }
 }

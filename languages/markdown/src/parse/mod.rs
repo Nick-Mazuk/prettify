@@ -1,10 +1,6 @@
 use self::leaf_blocks::{atx_heading, paragraph, thematic_break};
 use super::nodes::Block;
-use nom::{
-    branch::alt,
-    combinator::eof,
-    multi::{many0, many_till},
-};
+use nom::{branch::alt, combinator::eof, multi::many_till};
 
 // mod block;
 // mod empty_line;

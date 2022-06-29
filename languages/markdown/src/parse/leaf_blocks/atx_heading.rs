@@ -1,14 +1,13 @@
 use nom::{
     bytes::complete::tag,
-    character::complete::anychar,
     combinator::{opt, recognize},
-    multi::{many_m_n, many_till},
+    multi::many_m_n,
     sequence::{delimited, tuple},
 };
 
 use crate::{
     nodes::LeafBlock,
-    parse::preliminaries::{line_ending, space, space1, SPACE_CHAR},
+    parse::preliminaries::{any_until_line_ending, line_ending, space, space1, SPACE_CHAR},
 };
 
 fn trim_content(content: &str) -> &str {
@@ -29,7 +28,7 @@ pub fn atx_heading(input: &str) -> nom::IResult<&str, LeafBlock> {
         many_m_n(0, 3, space),
         tuple((
             many_m_n(1, 6, tag("#")),
-            opt(recognize(tuple((space1, many_till(anychar, line_ending))))),
+            opt(recognize(tuple((space1, any_until_line_ending)))),
         )),
         line_ending,
     )(input);
@@ -127,6 +126,19 @@ mod tests {
         );
         assert_eq!(atx_heading("## "), Ok(("", LeafBlock::Heading(2, ""))));
         assert_eq!(atx_heading("#"), Ok(("", LeafBlock::Heading(1, ""))));
+        // consumes the newline character
+        assert_eq!(
+            atx_heading("# Foo\n"),
+            Ok(("", LeafBlock::Heading(1, "Foo")))
+        );
+        assert_eq!(
+            atx_heading("# Foo\n\nhello"),
+            Ok(("\nhello", LeafBlock::Heading(1, "Foo")))
+        );
+        assert_eq!(
+            atx_heading("# Foo\nhello"),
+            Ok(("hello", LeafBlock::Heading(1, "Foo")))
+        );
     }
 
     #[test]
