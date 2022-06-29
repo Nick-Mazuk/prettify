@@ -1,0 +1,12 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/integration/extra-blank-lines-ending.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+There are way too many blank lines at the end of this document.
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

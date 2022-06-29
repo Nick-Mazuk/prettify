@@ -1,0 +1,16 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/heading/heading-hash-signs.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+# Programming languages
+
+## C#
+
+## JavaScript
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

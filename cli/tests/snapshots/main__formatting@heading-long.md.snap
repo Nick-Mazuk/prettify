@@ -1,0 +1,12 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/heading/heading-long.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+# this is a long long long long long long long long long long long long long long heading.
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

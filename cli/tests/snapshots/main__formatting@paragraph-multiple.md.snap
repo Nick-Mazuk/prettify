@@ -1,0 +1,14 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/paragraph/paragraph-multiple.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+I'm the first paragraph.
+
+I'm the second paragraph.
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

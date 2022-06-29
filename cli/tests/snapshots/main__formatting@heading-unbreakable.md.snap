@@ -1,0 +1,12 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/heading/heading-unbreakable.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+### `reporters` [array<moduleName | [moduleName, options]>]
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+
