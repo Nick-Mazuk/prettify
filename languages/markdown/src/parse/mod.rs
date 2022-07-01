@@ -19,7 +19,7 @@ fn leaf_block_as_block(input: &str) -> nom::IResult<&str, Block> {
     }
 }
 
-pub fn parse_markdown<'a>(markdown: &'a str) -> nom::IResult<&'a str, Vec<Block<'a>>> {
+pub fn parse_markdown(markdown: &str) -> nom::IResult<&str, Vec<Block>> {
     let result = many_till(leaf_block_as_block, eof)(markdown);
     match result {
         Ok((remainder, (blocks, _))) => Ok((remainder, blocks)),

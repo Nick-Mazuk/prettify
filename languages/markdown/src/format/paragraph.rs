@@ -1,13 +1,9 @@
 use prettify::{concat, fill, hard_line, join_to_vector, line, string, PrettifyDoc};
 
-pub fn format_paragraph<'a>(content: &'a str) -> PrettifyDoc<'a> {
+pub fn format_paragraph(content: &str) -> PrettifyDoc {
     concat(vec![
         fill(join_to_vector(
-            content
-                .replace('\n', " ")
-                .split(' ')
-                .map(|word| string(word))
-                .collect(),
+            content.replace('\n', " ").split(' ').map(string).collect(),
             line(),
         )),
         hard_line(),

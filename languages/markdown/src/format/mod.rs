@@ -7,14 +7,11 @@ mod header;
 mod paragraph;
 // mod leaf;
 
-pub fn create_prettify_doc<'a>(nodes: Vec<Block<'a>>) -> PrettifyDoc<'a> {
+pub fn create_prettify_doc(nodes: Vec<Block>) -> PrettifyDoc {
     group(join(
         nodes
             .into_iter()
-            .filter(|node| match node {
-                Block::Leaf(LeafBlock::BlankLine) => false,
-                _ => true,
-            })
+            .filter(|node| !matches!(node, Block::Leaf(LeafBlock::BlankLine)))
             .map(|node| match node {
                 Block::Leaf(LeafBlock::Heading(size, content)) => {
                     header::format_header(size, content)

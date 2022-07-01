@@ -1,6 +1,6 @@
 use prettify::{concat, hard_line, string, PrettifyDoc};
 
-pub fn format_header<'a>(size: usize, content: &'a str) -> PrettifyDoc<'a> {
+pub fn format_header(size: usize, content: &str) -> PrettifyDoc {
     let header_marker = "#";
     let header_marker = header_marker.repeat(size) + " ";
 
