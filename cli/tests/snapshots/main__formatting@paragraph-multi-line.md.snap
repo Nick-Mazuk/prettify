@@ -1,0 +1,13 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/paragraph/paragraph-multi-line.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+I'm a paragraph. I'm the continuation of the same paragraph just on a second line.
+This line needs to be long enough to cause the paragraph to wrap.
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

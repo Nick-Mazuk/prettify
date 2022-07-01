@@ -4,7 +4,7 @@ use nom::{
     character::complete::anychar,
     combinator::{eof, peek, recognize, rest},
     multi::{many0, many1, many_till},
-    sequence::terminated,
+    sequence::{terminated, tuple},
 };
 
 pub const NEWLINE_CHAR: char = '\n';
@@ -20,8 +20,12 @@ pub const LINE_TABULATION_STR: &str = "\x0B";
 pub const FORM_FEED_CHAR: char = '\x0C';
 pub const FORM_FEED_STR: &str = "\x0C";
 
+fn line_ending_no_eof(input: &str) -> nom::IResult<&str, &str> {
+    alt((tag(NEWLINE_STR), tag(CARRIAGE_RETURN_STR), tag("\r\n")))(input)
+}
+
 pub fn line_ending(input: &str) -> nom::IResult<&str, &str> {
-    alt((tag(NEWLINE_STR), tag(CARRIAGE_RETURN_STR), tag("\r\n"), eof))(input)
+    alt((line_ending_no_eof, eof))(input)
 }
 
 pub fn line(input: &str) -> nom::IResult<&str, &str> {
@@ -69,6 +73,18 @@ pub fn space1(input: &str) -> nom::IResult<&str, &str> {
 
 pub fn any_until_line_ending(input: &str) -> nom::IResult<&str, &str> {
     recognize(many_till(anychar, peek(line_ending)))(input)
+}
+
+pub fn block_ending(input: &str) -> nom::IResult<&str, &str> {
+    alt((
+        recognize(tuple((line_ending_no_eof, line_ending_no_eof))),
+        recognize(tuple((line_ending_no_eof, eof))),
+        eof,
+    ))(input)
+}
+
+pub fn any_until_block_ending(input: &str) -> nom::IResult<&str, &str> {
+    recognize(many_till(anychar, peek(block_ending)))(input)
 }
 
 #[cfg(test)]
