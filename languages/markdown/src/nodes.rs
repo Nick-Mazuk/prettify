@@ -2,6 +2,7 @@
 pub enum LeafBlock<'a> {
     ThematicBreak,
     AtxHeading(usize, &'a str),
+    SetextHeading(usize, &'a str),
     Paragraph(&'a str),
     BlankLine,
 }

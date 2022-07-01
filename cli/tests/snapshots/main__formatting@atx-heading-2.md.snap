@@ -1,11 +1,11 @@
 ---
 source: cli/tests/main.rs
 expression: file
-input_file: cli/tests/files/markdown/heading/heading-6.md
+input_file: cli/tests/files/markdown/atx-heading/atx-heading-2.md
 ---
 |                                                                              | printWidth
 ----------------------------------start input-----------------------------------
-###### Hello world
+## Hello world
 
 -----------------------------------end input------------------------------------
 |                                                                              | printWidth

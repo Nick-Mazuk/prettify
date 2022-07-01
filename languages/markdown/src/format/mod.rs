@@ -17,6 +17,9 @@ pub fn create_prettify_doc(nodes: Vec<Block>) -> PrettifyDoc {
                 }
                 Block::Leaf(LeafBlock::ThematicBreak) => concat(vec![string("---"), hard_line()]),
                 Block::Leaf(LeafBlock::Paragraph(content)) => paragraph::format_paragraph(content),
+                Block::Leaf(LeafBlock::SetextHeading(size, content)) => {
+                    heading::format_setext_heading(size, content)
+                }
                 Block::Leaf(LeafBlock::BlankLine) => {
                     panic!("Blank lines are not renderable and should be removed before this point")
                 }

@@ -1,6 +1,6 @@
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_till, take_till1},
+    bytes::complete::{tag, take_till, take_till1, take_while, take_while1},
     character::complete::anychar,
     combinator::{eof, peek, recognize, rest},
     multi::{many0, many1, many_till},
@@ -48,11 +48,11 @@ pub fn is_whitespace_char(char: char) -> bool {
 }
 
 pub fn whitespace0(input: &str) -> nom::IResult<&str, &str> {
-    take_till(is_whitespace_char)(input)
+    take_while(is_whitespace_char)(input)
 }
 
 pub fn whitespace1(input: &str) -> nom::IResult<&str, &str> {
-    take_till1(is_whitespace_char)(input)
+    take_while1(is_whitespace_char)(input)
 }
 
 pub fn is_space(char: char) -> bool {
@@ -64,11 +64,11 @@ pub fn space(input: &str) -> nom::IResult<&str, &str> {
 }
 
 pub fn space0(input: &str) -> nom::IResult<&str, &str> {
-    recognize(many0(tag(SPACE_STR)))(input)
+    take_while(is_space)(input)
 }
 
 pub fn space1(input: &str) -> nom::IResult<&str, &str> {
-    recognize(many1(tag(SPACE_STR)))(input)
+    take_while1(is_space)(input)
 }
 
 pub fn any_until_line_ending(input: &str) -> nom::IResult<&str, &str> {

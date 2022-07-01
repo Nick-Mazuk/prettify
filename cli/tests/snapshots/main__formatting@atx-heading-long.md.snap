@@ -1,11 +1,11 @@
 ---
 source: cli/tests/main.rs
 expression: file
-input_file: cli/tests/files/markdown/heading/heading-2.md
+input_file: cli/tests/files/markdown/atx-heading/atx-heading-long.md
 ---
 |                                                                              | printWidth
 ----------------------------------start input-----------------------------------
-## Hello world
+# this is a long long long long long long long long long long long long long long heading.
 
 -----------------------------------end input------------------------------------
 |                                                                              | printWidth
