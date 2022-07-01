@@ -2,13 +2,8 @@ use self::leaf_blocks::{atx_heading, blank_line, paragraph, thematic_break};
 use super::nodes::Block;
 use nom::{branch::alt, combinator::eof, multi::many_till};
 
-// mod block;
-// mod empty_line;
-// mod header;
 mod helpers;
-// mod leaf;
 mod leaf_blocks;
-// mod paragraph;
 mod preliminaries;
 
 fn leaf_block_as_block(input: &str) -> nom::IResult<&str, Block> {

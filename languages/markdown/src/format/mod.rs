@@ -5,7 +5,6 @@ use prettify::{concat, group, hard_line, join, string, PrettifyDoc};
 
 mod heading;
 mod paragraph;
-// mod leaf;
 
 pub fn create_prettify_doc(nodes: Vec<Block>) -> PrettifyDoc {
     group(join(
