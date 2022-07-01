@@ -1,4 +1,4 @@
-use prettify::{concat, hard_line, string, PrettifyDoc};
+use prettify::{concat, hard_line, join, string, PrettifyDoc};
 
 pub fn format_atx_heading(size: usize, content: &str) -> PrettifyDoc {
     let heading_marker = "#";
@@ -11,11 +11,12 @@ pub fn format_setext_heading(size: usize, content: &str) -> PrettifyDoc {
     if !content.contains('\n') {
         return format_atx_heading(size, content);
     }
+    let split_content = content.split('\n');
     let heading_marker = if size == 1 { "=" } else { "-" };
-    let heading_marker = heading_marker.repeat(10);
+    let heading_marker = heading_marker.repeat(split_content.last().unwrap().len());
 
     concat(vec![
-        string(content),
+        join(content.split('\n').map(string).collect(), hard_line()),
         hard_line(),
         string(heading_marker),
         hard_line(),
@@ -47,11 +48,11 @@ mod tests {
         );
         assert_eq!(
             print(format_setext_heading(1, "hello\nworld")),
-            "hello\nworld\n==========\n"
+            "hello\nworld\n=====\n"
         );
         assert_eq!(
             print(format_setext_heading(2, "hello\nworld")),
-            "hello\nworld\n----------\n"
+            "hello\nworld\n-----\n"
         );
     }
 }

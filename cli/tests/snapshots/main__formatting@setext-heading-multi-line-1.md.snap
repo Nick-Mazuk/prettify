@@ -1,0 +1,14 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/setext-heading/setext-heading-multi-line-1.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+I'm a setext heading 1
+And I span two lines
+====================
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+
