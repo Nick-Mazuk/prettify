@@ -14,7 +14,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn header_test() {
+    fn empty_line_test() {
         assert_eq!(empty_line(""), Ok(("", Block::EmptyLine)));
         assert_eq!(empty_line("\n"), Ok(("\n", Block::EmptyLine)));
     }

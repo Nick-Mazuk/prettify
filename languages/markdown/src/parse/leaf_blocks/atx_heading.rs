@@ -35,10 +35,10 @@ pub fn atx_heading(input: &str) -> nom::IResult<&str, LeafBlock> {
     match result {
         Ok((remainder, (hashtags, Some(content)))) => Ok((
             remainder,
-            LeafBlock::Heading(hashtags.len(), trim_content(content)),
+            LeafBlock::AtxHeading(hashtags.len(), trim_content(content)),
         )),
         Ok((remainder, (hashtags, None))) => {
-            Ok((remainder, LeafBlock::Heading(hashtags.len(), "")))
+            Ok((remainder, LeafBlock::AtxHeading(hashtags.len(), "")))
         }
         Err(error) => Err(error),
     }
@@ -51,93 +51,96 @@ mod tests {
 
     #[test]
     fn atx_heading_test() {
-        assert_eq!(atx_heading("# foo"), Ok(("", LeafBlock::Heading(1, "foo"))));
+        assert_eq!(
+            atx_heading("# foo"),
+            Ok(("", LeafBlock::AtxHeading(1, "foo")))
+        );
         assert_eq!(
             atx_heading("## foo"),
-            Ok(("", LeafBlock::Heading(2, "foo")))
+            Ok(("", LeafBlock::AtxHeading(2, "foo")))
         );
         assert_eq!(
             atx_heading("### foo"),
-            Ok(("", LeafBlock::Heading(3, "foo")))
+            Ok(("", LeafBlock::AtxHeading(3, "foo")))
         );
         assert_eq!(
             atx_heading("#### foo"),
-            Ok(("", LeafBlock::Heading(4, "foo")))
+            Ok(("", LeafBlock::AtxHeading(4, "foo")))
         );
         assert_eq!(
             atx_heading("##### foo"),
-            Ok(("", LeafBlock::Heading(5, "foo")))
+            Ok(("", LeafBlock::AtxHeading(5, "foo")))
         );
         assert_eq!(
             atx_heading("###### foo"),
-            Ok(("", LeafBlock::Heading(6, "foo")))
+            Ok(("", LeafBlock::AtxHeading(6, "foo")))
         );
         assert_eq!(
             atx_heading("#                  foo                     "),
-            Ok(("", LeafBlock::Heading(1, "foo")))
+            Ok(("", LeafBlock::AtxHeading(1, "foo")))
         );
         assert_eq!(
             atx_heading(" # foo"),
-            Ok(("", LeafBlock::Heading(1, "foo")))
+            Ok(("", LeafBlock::AtxHeading(1, "foo")))
         );
         assert_eq!(
             atx_heading("  # foo"),
-            Ok(("", LeafBlock::Heading(1, "foo")))
+            Ok(("", LeafBlock::AtxHeading(1, "foo")))
         );
         assert_eq!(
             atx_heading("   # foo"),
-            Ok(("", LeafBlock::Heading(1, "foo")))
+            Ok(("", LeafBlock::AtxHeading(1, "foo")))
         );
         assert_eq!(
             atx_heading("## foo ##"),
-            Ok(("", LeafBlock::Heading(2, "foo")))
+            Ok(("", LeafBlock::AtxHeading(2, "foo")))
         );
         assert_eq!(
             atx_heading("# foo ##################################"),
-            Ok(("", LeafBlock::Heading(1, "foo")))
+            Ok(("", LeafBlock::AtxHeading(1, "foo")))
         );
         assert_eq!(
             atx_heading("##### foo ##"),
-            Ok(("", LeafBlock::Heading(5, "foo")))
+            Ok(("", LeafBlock::AtxHeading(5, "foo")))
         );
         assert_eq!(
             atx_heading("### foo ###     "),
-            Ok(("", LeafBlock::Heading(3, "foo")))
+            Ok(("", LeafBlock::AtxHeading(3, "foo")))
         );
         assert_eq!(
             atx_heading("### foo ### b"),
-            Ok(("", LeafBlock::Heading(3, "foo ### b")))
+            Ok(("", LeafBlock::AtxHeading(3, "foo ### b")))
         );
         assert_eq!(
             atx_heading("# foo#"),
-            Ok(("", LeafBlock::Heading(1, "foo#")))
+            Ok(("", LeafBlock::AtxHeading(1, "foo#")))
         );
         assert_eq!(
             atx_heading("### foo \\###"),
-            Ok(("", LeafBlock::Heading(3, "foo \\###")))
+            Ok(("", LeafBlock::AtxHeading(3, "foo \\###")))
         );
         assert_eq!(
             atx_heading("## foo #\\##"),
-            Ok(("", LeafBlock::Heading(2, "foo #\\##")))
+            Ok(("", LeafBlock::AtxHeading(2, "foo #\\##")))
         );
         assert_eq!(
             atx_heading("# foo \\#"),
-            Ok(("", LeafBlock::Heading(1, "foo \\#")))
+            Ok(("", LeafBlock::AtxHeading(1, "foo \\#")))
         );
-        assert_eq!(atx_heading("## "), Ok(("", LeafBlock::Heading(2, ""))));
-        assert_eq!(atx_heading("#"), Ok(("", LeafBlock::Heading(1, ""))));
+        assert_eq!(atx_heading("## "), Ok(("", LeafBlock::AtxHeading(2, ""))));
+        assert_eq!(atx_heading("#"), Ok(("", LeafBlock::AtxHeading(1, ""))));
         // consumes the newline character
         assert_eq!(
             atx_heading("# Foo\n"),
-            Ok(("", LeafBlock::Heading(1, "Foo")))
+            Ok(("", LeafBlock::AtxHeading(1, "Foo")))
         );
         assert_eq!(
             atx_heading("# Foo\n\nhello"),
-            Ok(("\nhello", LeafBlock::Heading(1, "Foo")))
+            Ok(("\nhello", LeafBlock::AtxHeading(1, "Foo")))
         );
         assert_eq!(
             atx_heading("# Foo\nhello"),
-            Ok(("hello", LeafBlock::Heading(1, "Foo")))
+            Ok(("hello", LeafBlock::AtxHeading(1, "Foo")))
         );
     }
 

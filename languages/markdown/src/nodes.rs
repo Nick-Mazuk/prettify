@@ -17,7 +17,7 @@
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum LeafBlock<'a> {
     ThematicBreak,
-    Heading(usize, &'a str),
+    AtxHeading(usize, &'a str),
     Paragraph(&'a str),
     BlankLine,
 }

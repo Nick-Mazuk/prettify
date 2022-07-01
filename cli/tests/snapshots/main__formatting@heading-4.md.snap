@@ -1,7 +1,7 @@
 ---
 source: cli/tests/main.rs
 expression: file
-input_file: cli/tests/files/markdown/heading/header-4.md
+input_file: cli/tests/files/markdown/heading/heading-4.md
 ---
 |                                                                              | printWidth
 ----------------------------------start input-----------------------------------

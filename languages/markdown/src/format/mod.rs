@@ -3,7 +3,7 @@ use crate::nodes::LeafBlock;
 use super::nodes::Block;
 use prettify::{concat, group, hard_line, join, string, PrettifyDoc};
 
-mod header;
+mod heading;
 mod paragraph;
 // mod leaf;
 
@@ -13,8 +13,8 @@ pub fn create_prettify_doc(nodes: Vec<Block>) -> PrettifyDoc {
             .into_iter()
             .filter(|node| !matches!(node, Block::Leaf(LeafBlock::BlankLine)))
             .map(|node| match node {
-                Block::Leaf(LeafBlock::Heading(size, content)) => {
-                    header::format_header(size, content)
+                Block::Leaf(LeafBlock::AtxHeading(size, content)) => {
+                    heading::format_atx_heading(size, content)
                 }
                 Block::Leaf(LeafBlock::ThematicBreak) => concat(vec![string("---"), hard_line()]),
                 Block::Leaf(LeafBlock::Paragraph(content)) => paragraph::format_paragraph(content),
