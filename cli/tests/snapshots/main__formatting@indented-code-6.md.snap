@@ -1,0 +1,16 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/indented-code/indented-code-6.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+```
+foo
+```
+
+bar
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

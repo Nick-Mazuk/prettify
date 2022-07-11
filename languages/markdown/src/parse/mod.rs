@@ -1,4 +1,6 @@
-use self::leaf_blocks::{atx_heading, blank_line, paragraph, setext_heading, thematic_break};
+use self::leaf_blocks::{
+    atx_heading, blank_line, indented_code_block, paragraph, setext_heading, thematic_break,
+};
 use super::nodes::Block;
 use nom::{branch::alt, combinator::eof, multi::many_till};
 
@@ -9,6 +11,7 @@ mod preliminaries;
 fn leaf_block_as_block(input: &str) -> nom::IResult<&str, Block> {
     let result = alt((
         blank_line,
+        indented_code_block,
         atx_heading,
         thematic_break,
         setext_heading,

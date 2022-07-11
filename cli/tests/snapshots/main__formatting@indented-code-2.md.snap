@@ -1,0 +1,15 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/indented-code/indented-code-2.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+```
+a simple
+  indented code block
+```
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

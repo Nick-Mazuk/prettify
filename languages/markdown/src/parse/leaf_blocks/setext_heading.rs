@@ -8,7 +8,7 @@ use nom::{
 
 use crate::{
     nodes::LeafBlock,
-    parse::preliminaries::{any_until_line_ending, line_ending, space, space0, whitespace0},
+    parse::preliminaries::{any_until_line_ending, line_ending, space, space0},
 };
 
 fn heading_underline(input: &str) -> nom::IResult<&str, usize> {

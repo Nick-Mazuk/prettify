@@ -1,0 +1,20 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/indented-code/indented-code-4.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+```
+chunk1
+
+chunk2
+
+
+
+chunk3
+```
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+
