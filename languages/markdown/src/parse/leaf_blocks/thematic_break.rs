@@ -13,7 +13,7 @@ use crate::{
 };
 
 pub fn thematic_break(input: &str) -> nom::IResult<&str, LeafBlock> {
-    let result = tuple((
+    let (remainder, _) = tuple((
         many_m_n(0, 3, space),
         alt((
             count(tuple((tag("-"), space0)), 3),
@@ -22,11 +22,8 @@ pub fn thematic_break(input: &str) -> nom::IResult<&str, LeafBlock> {
         )),
         many0(alt((recognize(one_of("-*_")), space))),
         line_ending,
-    ))(input);
-    match result {
-        Ok((remainder, _)) => Ok((remainder, LeafBlock::ThematicBreak)),
-        Err(error) => Err(error),
-    }
+    ))(input)?;
+    Ok((remainder, LeafBlock::ThematicBreak))
 }
 
 #[cfg(test)]

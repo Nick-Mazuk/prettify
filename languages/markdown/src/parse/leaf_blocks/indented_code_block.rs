@@ -24,22 +24,17 @@ fn empty_line(input: &str) -> nom::IResult<&str, &str> {
 }
 
 pub fn indented_code_block(input: &str) -> nom::IResult<&str, LeafBlock> {
-    let result = tuple((
+    let (remainder, (first_line, mut lines)) = tuple((
         code_block_line,
         many0(alt((
             code_block_line,
             empty_line,
             terminated(tag(""), line_ending_no_eof),
         ))),
-    ))(input);
+    ))(input)?;
 
-    match result {
-        Ok((remainder, (first_line, mut lines))) => {
-            lines.insert(0, first_line);
-            Ok((remainder, LeafBlock::IndentedCodeBlock(lines)))
-        }
-        Err(error) => Err(error),
-    }
+    lines.insert(0, first_line);
+    Ok((remainder, LeafBlock::IndentedCodeBlock(lines)))
 }
 
 #[cfg(test)]

@@ -3,11 +3,8 @@ use nom::{bytes::complete::is_a, combinator::opt, sequence::terminated};
 use crate::{nodes::LeafBlock, parse::preliminaries::line_ending};
 
 pub fn blank_line(input: &str) -> nom::IResult<&str, LeafBlock> {
-    let result = terminated(opt(is_a(" \t")), line_ending)(input);
-    match result {
-        Ok((remainder, _)) => Ok((remainder, LeafBlock::BlankLine)),
-        Err(error) => Err(error),
-    }
+    let (remainder, _) = terminated(opt(is_a(" \t")), line_ending)(input)?;
+    Ok((remainder, LeafBlock::BlankLine))
 }
 
 #[cfg(test)]

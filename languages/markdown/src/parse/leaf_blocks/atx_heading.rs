@@ -24,23 +24,20 @@ fn trim_content(content: &str) -> &str {
 }
 
 pub fn atx_heading(input: &str) -> nom::IResult<&str, LeafBlock> {
-    let result = delimited(
+    let (remainder, (hashtags, content)) = delimited(
         many_m_n(0, 3, space),
         tuple((
             many_m_n(1, 6, tag("#")),
             opt(recognize(tuple((space1, any_until_line_ending)))),
         )),
         line_ending,
-    )(input);
-    match result {
-        Ok((remainder, (hashtags, Some(content)))) => Ok((
+    )(input)?;
+    match content {
+        Some(content) => Ok((
             remainder,
             LeafBlock::AtxHeading(hashtags.len(), trim_content(content)),
         )),
-        Ok((remainder, (hashtags, None))) => {
-            Ok((remainder, LeafBlock::AtxHeading(hashtags.len(), "")))
-        }
-        Err(error) => Err(error),
+        None => Ok((remainder, LeafBlock::AtxHeading(hashtags.len(), ""))),
     }
 }
 

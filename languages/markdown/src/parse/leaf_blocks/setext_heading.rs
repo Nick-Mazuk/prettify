@@ -12,15 +12,12 @@ use crate::{
 };
 
 fn heading_underline(input: &str) -> nom::IResult<&str, usize> {
-    let result = delimited(
+    let (remainder, underline) = delimited(
         many_m_n(0, 3, space),
         recognize(alt((many1(tag("=")), many1(tag("-"))))),
         tuple((space0, line_ending)),
-    )(input);
-    match result {
-        Ok((remainder, underline)) => Ok((remainder, if underline.contains('=') { 1 } else { 2 })),
-        Err(error) => Err(error),
-    }
+    )(input)?;
+    Ok((remainder, if underline.contains('=') { 1 } else { 2 }))
 }
 
 pub fn setext_heading(input: &str) -> nom::IResult<&str, LeafBlock> {

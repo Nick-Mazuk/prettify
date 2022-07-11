@@ -5,11 +5,8 @@ use crate::{
 use nom::sequence::terminated;
 
 pub fn paragraph(input: &str) -> nom::IResult<&str, LeafBlock> {
-    let result = terminated(any_until_block_ending, block_ending)(input);
-    match result {
-        Ok((remainder, content)) => Ok((remainder, LeafBlock::Paragraph(content.trim()))),
-        Err(error) => Err(error),
-    }
+    let (remainder, content) = terminated(any_until_block_ending, block_ending)(input)?;
+    Ok((remainder, LeafBlock::Paragraph(content.trim())))
 }
 
 #[cfg(test)]
