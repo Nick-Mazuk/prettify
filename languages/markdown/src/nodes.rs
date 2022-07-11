@@ -5,6 +5,7 @@ pub enum LeafBlock<'a> {
     SetextHeading(usize, &'a str),
     Paragraph(&'a str),
     IndentedCodeBlock(Vec<&'a str>),
+    FencedCodeBlock(&'a str, Vec<&'a str>),
     BlankLine,
 }
 

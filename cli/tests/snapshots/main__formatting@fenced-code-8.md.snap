@@ -1,0 +1,16 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/fenced-code/fenced-code-8.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+```ruby startline=3 $%@#$
+def foo(x)
+  return 3
+end
+```
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

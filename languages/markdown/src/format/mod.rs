@@ -3,6 +3,7 @@ use crate::nodes::LeafBlock;
 use super::nodes::Block;
 use prettify::{concat, group, hard_line, join, string, PrettifyDoc};
 
+mod fenced_code_block;
 mod heading;
 mod indented_code_block;
 mod paragraph;
@@ -23,6 +24,9 @@ pub fn create_prettify_doc(nodes: Vec<Block>) -> PrettifyDoc {
                 }
                 Block::Leaf(LeafBlock::IndentedCodeBlock(code)) => {
                     indented_code_block::format_indented_code_block(code)
+                }
+                Block::Leaf(LeafBlock::FencedCodeBlock(info, code)) => {
+                    fenced_code_block::format_fenced_code_block(info, code)
                 }
                 Block::Leaf(LeafBlock::BlankLine) => {
                     panic!("Blank lines are not renderable and should be removed before this point")

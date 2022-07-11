@@ -1,5 +1,6 @@
 use self::leaf_blocks::{
-    atx_heading, blank_line, indented_code_block, paragraph, setext_heading, thematic_break,
+    atx_heading, blank_line, fenced_code_block, indented_code_block, paragraph, setext_heading,
+    thematic_break,
 };
 use super::nodes::Block;
 use nom::{branch::alt, combinator::eof, multi::many_till};
@@ -14,6 +15,7 @@ fn leaf_block_as_block(input: &str) -> nom::IResult<&str, Block> {
         indented_code_block,
         atx_heading,
         thematic_break,
+        fenced_code_block,
         setext_heading,
         paragraph,
     ))(input);

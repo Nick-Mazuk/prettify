@@ -1,0 +1,18 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/fenced-code/fenced-code-6.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+## foo
+
+```
+bar
+```
+
+# baz
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

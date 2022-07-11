@@ -58,6 +58,10 @@ mod tests {
             "```\nhello\n\n\nworld\n```\n"
         );
         assert_eq!(
+            print(format_indented_code_block(vec!["hello  ", "world   "])),
+            "```\nhello\nworld\n```\n"
+        );
+        assert_eq!(
             print(format_indented_code_block(vec!["hello", "```", "world"])),
             "````\nhello\n```\nworld\n````\n"
         );

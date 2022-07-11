@@ -1,0 +1,12 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/markdown/paragraph/paragraph-2.md
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+Foo bar
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

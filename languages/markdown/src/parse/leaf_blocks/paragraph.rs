@@ -1,11 +1,26 @@
 use crate::{
     nodes::LeafBlock,
-    parse::preliminaries::{any_until_block_ending, block_ending},
+    parse::preliminaries::{
+        any_until_block_ending, any_until_line_ending, block_ending, line_ending,
+    },
 };
-use nom::sequence::terminated;
+use nom::{
+    branch::alt,
+    combinator::{peek, recognize},
+    multi::many_till,
+    sequence::{terminated, tuple},
+};
+
+use super::fenced_code_block;
 
 pub fn paragraph(input: &str) -> nom::IResult<&str, LeafBlock> {
-    let (remainder, content) = terminated(any_until_block_ending, block_ending)(input)?;
+    let (remainder, content) = alt((
+        recognize(many_till(
+            tuple((any_until_line_ending, line_ending)),
+            peek(fenced_code_block),
+        )),
+        terminated(any_until_block_ending, block_ending),
+    ))(input)?;
     Ok((remainder, LeafBlock::Paragraph(content.trim())))
 }
 
