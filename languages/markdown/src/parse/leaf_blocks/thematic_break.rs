@@ -16,11 +16,19 @@ pub fn thematic_break(input: &str) -> nom::IResult<&str, LeafBlock> {
     let (remainder, _) = tuple((
         many_m_n(0, 3, space),
         alt((
-            count(tuple((tag("-"), space0)), 3),
-            count(tuple((tag("*"), space0)), 3),
-            count(tuple((tag("_"), space0)), 3),
+            tuple((
+                count(tuple((tag("-"), space0)), 3),
+                many0(alt((recognize(one_of("-")), space))),
+            )),
+            tuple((
+                count(tuple((tag("*"), space0)), 3),
+                many0(alt((recognize(one_of("*")), space))),
+            )),
+            tuple((
+                count(tuple((tag("_"), space0)), 3),
+                many0(alt((recognize(one_of("_")), space))),
+            )),
         )),
-        many0(alt((recognize(one_of("-*_")), space))),
         line_ending,
     ))(input)?;
     Ok((remainder, LeafBlock::ThematicBreak))
@@ -78,5 +86,8 @@ mod tests {
         assert_errors(thematic_break("a------"));
         assert_errors(thematic_break("---a---"));
         assert_errors(thematic_break("*-*"));
+        assert_errors(thematic_break("*** -"));
+        assert_errors(thematic_break("--- *"));
+        assert_errors(thematic_break("___ *"));
     }
 }
