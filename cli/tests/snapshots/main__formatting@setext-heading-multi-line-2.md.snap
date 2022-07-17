@@ -5,9 +5,7 @@ input_file: cli/tests/files/markdown/setext-heading/setext-heading-multi-line-2.
 ---
 |                                                                              | printWidth
 ----------------------------------start input-----------------------------------
-I'm a setext heading 2
-And I span two lines
---------------------
+## I'm a setext heading 2 and I will collapse to an atx heading
 
 -----------------------------------end input------------------------------------
 |                                                                              | printWidth

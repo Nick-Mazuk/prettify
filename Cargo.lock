@@ -542,7 +542,7 @@ dependencies = [
 
 [[package]]
 name = "prettify"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "indoc",
  "regex",
@@ -561,7 +561,7 @@ dependencies = [
 
 [[package]]
 name = "prettify-markdown"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "comrak",
  "nom",

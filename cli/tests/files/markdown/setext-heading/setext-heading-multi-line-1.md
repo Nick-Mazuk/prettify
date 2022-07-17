@@ -1,3 +1,3 @@
 I'm a setext heading 1
-And I span two lines
+and I will collapse to an atx heading
 ====

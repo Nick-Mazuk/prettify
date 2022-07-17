@@ -1,11 +1,13 @@
 ---
 source: cli/tests/main.rs
 expression: file
-input_file: cli/tests/files/markdown/setext-heading/setext-heading-multi-line-1.md
+input_file: cli/tests/files/markdown/setext-heading/setext-heading-multi-line-3.md
 ---
 |                                                                              | printWidth
 ----------------------------------start input-----------------------------------
-# I'm a setext heading 1 and I will collapse to an atx heading
+I'm a setext heading 1 and I will will span two lines because I'm really long and
+can't fit as an atx heading on a single line
+============
 
 -----------------------------------end input------------------------------------
 |                                                                              | printWidth

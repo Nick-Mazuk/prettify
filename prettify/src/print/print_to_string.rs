@@ -63,6 +63,8 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                     pos -= trim(&mut out);
                 }
                 DocCommand::Group(contents, options) => {
+                    let mut should_insert_into_map = true;
+                    let next_mode = Mode::Flat;
                     if mode == Mode::Flat && !should_remeasure {
                         commands.push((
                             Rc::clone(&indent),
@@ -73,14 +75,11 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                             },
                             Rc::clone(contents),
                         ));
-                    };
-                    should_remeasure = false;
-                    let mut next_mode = Mode::Flat;
-                    let next: Command = (Rc::clone(&indent), next_mode, Rc::clone(contents));
-                    let remainder = PRINT_WIDTH - pos;
-                    let has_line_suffix = !line_suffixes.is_empty();
-                    let mut should_insert_into_map = true;
-                    if options.should_break || options.expanded_states.is_empty() {
+                    } else {
+                        should_remeasure = false;
+                        let next: Command = (Rc::clone(&indent), Mode::Flat, Rc::clone(contents));
+                        let remainder = PRINT_WIDTH - pos;
+                        let has_line_suffix = !line_suffixes.is_empty();
                         if !options.should_break
                             && fits(
                                 &next,
@@ -93,27 +92,49 @@ pub fn print_to_string<'a>(doc: Rc<Doc<'a>>, config: &PrettifyConfig) -> String 
                             )
                         {
                             commands.push(next);
-                        } else {
-                            should_remeasure = true;
-                            next_mode = Mode::Break;
-                            commands.push((indent, Mode::Break, Rc::clone(contents)));
-                        }
-                    } else {
-                        let expanded_states = &options.expanded_states;
-                        for option in expanded_states.iter().take(options.expanded_states.len()) {
-                            let command = (Rc::clone(&indent), next_mode, Rc::clone(option));
-                            if fits(
-                                &command,
-                                &commands,
-                                remainder,
-                                options,
-                                has_line_suffix,
-                                false,
-                                config,
-                            ) {
-                                commands.push(command);
-                                should_insert_into_map = false;
+                        } else if !options.expanded_states.is_empty() {
+                            let most_expanded = options.expanded_states.last().unwrap();
+                            if options.should_break {
+                                commands.push((
+                                    Rc::clone(&indent),
+                                    Mode::Break,
+                                    Rc::clone(most_expanded),
+                                ));
+                            } else {
+                                let expanded_states = &options.expanded_states;
+                                for i in 1..(expanded_states.len() + 1) {
+                                    if i >= expanded_states.len() {
+                                        commands.push((
+                                            Rc::clone(&indent),
+                                            Mode::Flat,
+                                            Rc::clone(most_expanded),
+                                        ));
+                                        should_insert_into_map = false;
+                                        break;
+                                    } else {
+                                        let command = (
+                                            Rc::clone(&indent),
+                                            next_mode,
+                                            Rc::clone(&expanded_states[i]),
+                                        );
+                                        if fits(
+                                            &command,
+                                            &commands,
+                                            remainder,
+                                            options,
+                                            has_line_suffix,
+                                            false,
+                                            config,
+                                        ) {
+                                            commands.push(command);
+                                            should_insert_into_map = false;
+                                            break;
+                                        }
+                                    }
+                                }
                             }
+                        } else {
+                            commands.push((indent, Mode::Break, Rc::clone(contents)));
                         }
                     }
                     if should_insert_into_map {
