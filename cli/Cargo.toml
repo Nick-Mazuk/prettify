@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 "prettify-markdown" = { path = "../languages/markdown" }
+"prettify-toml" = { path = "../languages/toml" }
 "prettify" = { path = "../prettify" }
 glob = "0.3.0"
 

@@ -1,0 +1,12 @@
+---
+source: cli/tests/main.rs
+assertion_line: 25
+expression: file
+input_file: cli/tests/files/toml/table/toml-comment-1.toml
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

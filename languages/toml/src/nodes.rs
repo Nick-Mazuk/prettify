@@ -1,9 +1,18 @@
 #[derive(PartialEq, Debug, Clone)]
-pub enum Node {
-    Boolean(bool),
+pub struct Key<'a> {
+    pub value: &'a str,
+    pub quoted: bool,
 }
 
-pub struct Block<'a> {
-    pub nodes: Vec<Node>,
-    pub name: Option<&'a str>,
+#[derive(PartialEq, Debug, Clone)]
+pub enum Node<'a> {
+    Boolean(bool),
+    Comment(&'a str),
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct Table<'a> {
+    pub nodes: Vec<Node<'a>>,
+    pub key: Vec<Key<'a>>,
+    pub repeated: bool,
 }
