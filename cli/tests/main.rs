@@ -4,7 +4,7 @@ pub fn format_file(file_name: &str, contents: &str) -> String {
     let language = get_language_from_filename(file_name);
     match language {
         Some(matched_language) => format_by_language(contents, matched_language),
-        _ => contents.to_string(),
+        _ => panic!("{} is not a supported file type", file_name),
     }
 }
 

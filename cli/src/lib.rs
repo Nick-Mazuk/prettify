@@ -16,7 +16,13 @@ pub fn format_by_language(contents: &str, language: Language) -> String {
     };
     match doc {
         Ok(doc) => print(doc),
-        Err(_) => contents.to_string(),
+        Err(_) => {
+            if cfg!(test) {
+                panic!("all test files should be parsed correctly.")
+            } else {
+                contents.to_string()
+            }
+        }
     }
 }
 
