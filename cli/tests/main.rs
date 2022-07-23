@@ -25,3 +25,15 @@ fn test_formatting() {
         insta::assert_snapshot!(file);
     });
 }
+
+#[test]
+fn test_idempotency() {
+    // this test ensures that the formatting an already formatted document doesn't
+    // change the formatting.
+    insta::glob!("files/**/*.*", |path| {
+        let contents = std::fs::read_to_string(path).unwrap();
+        let file_name = path.file_name().unwrap().to_str().unwrap();
+        let formatted = format_file(file_name, &contents);
+        assert_eq!(formatted, format_file(file_name, &formatted));
+    });
+}
