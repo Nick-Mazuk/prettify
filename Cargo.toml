@@ -4,4 +4,6 @@ members = [
     "prettify",
     "cli",
     "languages/markdown",
+    "languages/toml",
+    "languages/lua",
 ]

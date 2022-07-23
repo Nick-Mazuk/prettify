@@ -560,6 +560,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "prettify-lua"
+version = "0.1.0"
+dependencies = [
+ "nom",
+ "prettify",
+]
+
+[[package]]
 name = "prettify-markdown"
 version = "0.2.0"
 dependencies = [
@@ -567,6 +575,14 @@ dependencies = [
  "nom",
  "prettify",
  "regex",
+]
+
+[[package]]
+name = "prettify-toml"
+version = "0.1.0"
+dependencies = [
+ "nom",
+ "prettify",
 ]
 
 [[package]]
