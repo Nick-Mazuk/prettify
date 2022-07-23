@@ -2,6 +2,7 @@ extern crate nom;
 extern crate prettify;
 
 mod format;
+mod helpers;
 mod nodes;
 mod parse;
 

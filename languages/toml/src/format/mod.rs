@@ -1,6 +1,8 @@
 use crate::nodes::{Node, Table};
 use prettify::{group, hard_line, join, line_suffix, string, PrettifyDoc};
 
+mod key;
+
 pub fn create_prettify_doc(blocks: Vec<Table>) -> PrettifyDoc {
     group(join(
         blocks

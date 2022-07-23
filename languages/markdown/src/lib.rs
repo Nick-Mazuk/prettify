@@ -1,4 +1,5 @@
 extern crate prettify;
+extern crate prettify_shared;
 
 mod format;
 mod nodes;

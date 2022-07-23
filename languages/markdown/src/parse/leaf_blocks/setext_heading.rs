@@ -43,7 +43,7 @@ pub fn setext_heading(input: &str) -> nom::IResult<&str, LeafBlock> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parse::helpers::assert_errors;
+    use prettify_shared::parse::test_helpers::assert_errors;
 
     #[test]
     fn setext_heading_test() {

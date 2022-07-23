@@ -575,7 +575,16 @@ dependencies = [
  "comrak",
  "nom",
  "prettify",
+ "prettify-shared",
  "regex",
+]
+
+[[package]]
+name = "prettify-shared"
+version = "0.1.0"
+dependencies = [
+ "nom",
+ "prettify",
 ]
 
 [[package]]
@@ -584,6 +593,7 @@ version = "0.1.0"
 dependencies = [
  "nom",
  "prettify",
+ "prettify-shared",
 ]
 
 [[package]]

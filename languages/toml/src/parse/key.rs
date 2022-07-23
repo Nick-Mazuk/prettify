@@ -1,10 +1,9 @@
-use super::helpers::is_alphanumeric_or_underscore_or_dash;
-use crate::nodes::Key;
+use crate::{helpers::is_alphanumeric_or_underscore_or_dash, nodes::Key};
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until, take_while1},
     character::complete::space0,
-    multi::{many0, separated_list1},
+    multi::separated_list1,
     sequence::delimited,
 };
 

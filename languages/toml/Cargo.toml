@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 prettify = { path = "../../prettify", version = ">=0.3.0" }
+"prettify-shared" = { path = "../shared", version = ">=0.1.0" }
 nom = "7"

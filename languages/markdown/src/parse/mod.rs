@@ -5,7 +5,6 @@ use self::leaf_blocks::{
 use super::nodes::Block;
 use nom::{branch::alt, combinator::eof, multi::many_till};
 
-mod helpers;
 mod leaf_blocks;
 mod preliminaries;
 

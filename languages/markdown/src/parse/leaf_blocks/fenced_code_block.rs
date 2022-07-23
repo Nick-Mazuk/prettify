@@ -61,7 +61,7 @@ pub fn fenced_code_block(input: &str) -> nom::IResult<&str, LeafBlock> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::parse::helpers::assert_errors;
+    use prettify_shared::parse::test_helpers::assert_errors;
 
     #[test]
     fn fenced_code_block_test() {
