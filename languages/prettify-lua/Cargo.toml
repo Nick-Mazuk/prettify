@@ -1,0 +1,12 @@
+[package]
+name = "prettify-lua"
+version = "0.1.0"
+license = "MIT"
+description = "Format Lua at the speed of Rust."
+edition = "2021"
+
+[dependencies]
+prettify = { path = "../../prettify", version = ">=0.3.0" }
+nom = "7"
+regex = "1"
+comrak = "0.13.1"
