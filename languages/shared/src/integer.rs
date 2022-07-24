@@ -152,6 +152,7 @@ mod test {
         assert_formatted(integer("-0o"), ("", "-0o0"));
         assert_formatted(integer("+0o12_"), ("", "0o12"));
         assert_formatted(integer("0o"), ("", "0o0"));
+        assert_formatted(integer("0o1234567"), ("", "0o123_4567"));
     }
 
     #[test]
@@ -162,5 +163,6 @@ mod test {
         assert_formatted(integer("-12_34"), ("", "-12_34"));
         assert_formatted(integer("-12_"), ("", "-12"));
         assert_formatted(integer("+12_"), ("", "12"));
+        assert_formatted(integer("+12345"), ("", "12_345"));
     }
 }
