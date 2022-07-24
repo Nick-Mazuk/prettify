@@ -1,4 +1,4 @@
-use crate::{Integer, IntegerKind};
+use crate::{add_integer_underscores, Integer, IntegerKind};
 use prettify::{concat, string, PrettifyDoc};
 
 pub fn format_integer(integer: Integer) -> PrettifyDoc {
@@ -10,24 +10,8 @@ pub fn format_integer(integer: Integer) -> PrettifyDoc {
             IntegerKind::Octal => string("0o"),
             IntegerKind::Binary => string("0b"),
         },
-        format_value(integer.value),
+        string(add_integer_underscores(integer.value).to_ascii_lowercase()),
     ])
-}
-
-fn format_value(value: &str) -> PrettifyDoc {
-    let value = value.to_ascii_lowercase();
-    if value.len() <= 3 || value.contains("_") {
-        string(value)
-    } else {
-        let mut new_value = String::new();
-        for (index, char) in value.chars().rev().enumerate() {
-            if index > 0 && index % 3 == 0 {
-                new_value.push('_');
-            }
-            new_value.push(char);
-        }
-        string(new_value.chars().rev().collect::<String>())
-    }
 }
 
 #[cfg(test)]
