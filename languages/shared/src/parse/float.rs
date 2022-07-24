@@ -1,14 +1,30 @@
+use crate::{add_integer_underscores, add_integer_underscores_reverse};
+
 use super::helpers::{optional_sign_is_positive, sign, trim_value};
-use crate::Float;
 use nom::{
     branch::alt,
     bytes::complete::{is_a, tag, tag_no_case},
     combinator::{map, opt},
     sequence::{preceded, tuple},
 };
+use prettify::{concat, string, PrettifyDoc};
 
-fn parse_exponent(input: &str) -> nom::IResult<&str, (Option<&str>, &str)> {
-    preceded(tag_no_case("e"), tuple((opt(sign), is_a("0123456789_"))))(input)
+fn parse_exponent(input: &str) -> nom::IResult<&str, PrettifyDoc> {
+    let (remainder, (sign, digits)) =
+        preceded(tag_no_case("e"), tuple((opt(sign), is_a("0123456789_"))))(input)?;
+
+    Ok((
+        remainder,
+        concat(vec![
+            string("e"),
+            string(if !optional_sign_is_positive(sign) {
+                "-"
+            } else {
+                ""
+            }),
+            string(add_integer_underscores(trim_value(digits))),
+        ]),
+    ))
 }
 
 /**
@@ -16,7 +32,7 @@ fn parse_exponent(input: &str) -> nom::IResult<&str, (Option<&str>, &str)> {
  but that allows for a better developer experience. Specifically, though,
  this float parser follows the JavaScript spec for integers.
 */
-pub fn float(input: &str) -> nom::IResult<&str, Float> {
+pub fn float(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     let (remainder, (sign, integer, _, fraction, exponent)) = alt((
         tuple((
             opt(sign),
@@ -36,177 +52,43 @@ pub fn float(input: &str) -> nom::IResult<&str, Float> {
 
     Ok((
         remainder,
-        Float {
-            is_negative: !optional_sign_is_positive(sign),
-            integer: match integer {
-                Some(integer) => trim_value(integer),
-                None => "0",
-            },
-            fraction: match fraction {
-                Some(fraction) => Some(trim_value(fraction)),
-                None => None,
-            },
-            exponent_is_negative: match exponent {
-                Some((Some(exponent), _)) => exponent == "-",
-                _ => false,
-            },
-            exponent: match exponent {
-                Some((_, value)) => Some(trim_value(value)),
-                _ => None,
-            },
-        },
+        concat(vec![
+            string(if !optional_sign_is_positive(sign) {
+                "-"
+            } else {
+                ""
+            }),
+            string(add_integer_underscores(trim_value(integer.unwrap_or("")))),
+            string("."),
+            string(add_integer_underscores_reverse(trim_value(
+                fraction.unwrap_or(""),
+            ))),
+            exponent.unwrap_or(string("")),
+        ]),
     ))
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::assert_errors;
+    use crate::{assert_errors, assert_formatted};
 
     #[test]
     fn float_test() {
-        assert_eq!(
-            float("1.0"),
-            Ok((
-                "",
-                Float {
-                    is_negative: false,
-                    integer: "1",
-                    fraction: Some("0"),
-                    exponent_is_negative: false,
-                    exponent: None,
-                }
-            ))
-        );
-        assert_eq!(
-            float("-1.0"),
-            Ok((
-                "",
-                Float {
-                    is_negative: true,
-                    integer: "1",
-                    fraction: Some("0"),
-                    exponent_is_negative: false,
-                    exponent: None,
-                }
-            ))
-        );
-        assert_eq!(
-            float("1.0e2"),
-            Ok((
-                "",
-                Float {
-                    is_negative: false,
-                    integer: "1",
-                    fraction: Some("0"),
-                    exponent_is_negative: false,
-                    exponent: Some("2"),
-                }
-            ))
-        );
-        assert_eq!(
-            float("1.0e-2"),
-            Ok((
-                "",
-                Float {
-                    is_negative: false,
-                    integer: "1",
-                    fraction: Some("0"),
-                    exponent_is_negative: true,
-                    exponent: Some("2"),
-                }
-            ))
-        );
-        assert_eq!(
-            float("1.0e+2"),
-            Ok((
-                "",
-                Float {
-                    is_negative: false,
-                    integer: "1",
-                    fraction: Some("0"),
-                    exponent_is_negative: false,
-                    exponent: Some("2"),
-                }
-            ))
-        );
-        assert_eq!(
-            float("1.0e2_"),
-            Ok((
-                "",
-                Float {
-                    is_negative: false,
-                    integer: "1",
-                    fraction: Some("0"),
-                    exponent_is_negative: false,
-                    exponent: Some("2"),
-                }
-            ))
-        );
-        assert_eq!(
-            float("1.0E-2_"),
-            Ok((
-                "",
-                Float {
-                    is_negative: false,
-                    integer: "1",
-                    fraction: Some("0"),
-                    exponent_is_negative: true,
-                    exponent: Some("2"),
-                }
-            ))
-        );
-        assert_eq!(
-            float("1."),
-            Ok((
-                "",
-                Float {
-                    is_negative: false,
-                    integer: "1",
-                    fraction: None,
-                    exponent_is_negative: false,
-                    exponent: None,
-                }
-            ))
-        );
-        assert_eq!(
-            float("1.e2"),
-            Ok((
-                "",
-                Float {
-                    is_negative: false,
-                    integer: "1",
-                    fraction: None,
-                    exponent_is_negative: false,
-                    exponent: Some("2"),
-                }
-            ))
-        );
-        assert_eq!(
-            float(".7"),
-            Ok((
-                "",
-                Float {
-                    is_negative: false,
-                    integer: "0",
-                    fraction: Some("7"),
-                    exponent_is_negative: false,
-                    exponent: None,
-                }
-            ))
-        );
-        assert_eq!(
-            float(".7e-4"),
-            Ok((
-                "",
-                Float {
-                    is_negative: false,
-                    integer: "0",
-                    fraction: Some("7"),
-                    exponent_is_negative: true,
-                    exponent: Some("4"),
-                }
-            ))
+        assert_formatted(float("1.0"), ("", "1.0"));
+        assert_formatted(float("-1.0"), ("", "-1.0"));
+        assert_formatted(float("1.0e2"), ("", "1.0e2"));
+        assert_formatted(float("1.0E-2"), ("", "1.0e-2"));
+        assert_formatted(float("1.0e+2"), ("", "1.0e2"));
+        assert_formatted(float("1.0e2_"), ("", "1.0e2"));
+        assert_formatted(float("1.0E-2_"), ("", "1.0e-2"));
+        assert_formatted(float("1."), ("", "1.0"));
+        assert_formatted(float("1.e2"), ("", "1.0e2"));
+        assert_formatted(float(".7"), ("", "0.7"));
+        assert_formatted(float(".7e-4"), ("", "0.7e-4"));
+        assert_formatted(
+            float("123456.1234567e12345678"),
+            ("", "123_456.123_456_7e12_345_678"),
         );
     }
 
