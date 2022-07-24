@@ -5,7 +5,7 @@ pub fn trim_value(input: &str) -> &str {
     let value = input
         .trim_end_matches('_')
         .trim_start_matches(|char| char == '_' || char == '0' || char == ' ');
-    if value == "" {
+    if value.is_empty() {
         "0"
     } else {
         value
@@ -37,7 +37,7 @@ pub fn opt_sign(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 }
 
 pub fn add_integer_underscores_every_n(value: &str, n: usize) -> String {
-    if value.len() <= n || value.contains("_") {
+    if value.len() <= n || value.contains('_') {
         value.to_string()
     } else {
         let mut new_value = String::new();
@@ -52,7 +52,7 @@ pub fn add_integer_underscores_every_n(value: &str, n: usize) -> String {
 }
 
 pub fn add_integer_underscores_reverse_every_n(value: &str, n: usize) -> String {
-    if value.len() <= n || value.contains("_") {
+    if value.len() <= n || value.contains('_') {
         value.to_string()
     } else {
         let mut new_value = String::new();

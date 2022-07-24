@@ -9,7 +9,7 @@ use nom::{
 use prettify::{concat, string, PrettifyDoc};
 
 pub fn is_digit(chr: char) -> bool {
-    chr >= '0' && chr <= '9'
+    ('0'..='9').contains(&chr)
 }
 
 pub fn rfc_3339_full_year(input: &str) -> nom::IResult<&str, PrettifyDoc> {
@@ -44,13 +44,13 @@ pub fn rfc_3339_second(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 
 pub fn rfc_3339_second_subfraction(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     let (remainder, mut result) = preceded(tag("."), digit0)(input)?;
-    result = result.trim_end_matches("0");
+    result = result.trim_end_matches('0');
     if result.is_empty() {
         Ok((remainder, string("")))
     } else {
         Ok((
             remainder,
-            concat(vec![string("."), string(result.trim_end_matches("0"))]),
+            concat(vec![string("."), string(result.trim_end_matches('0'))]),
         ))
     }
 }

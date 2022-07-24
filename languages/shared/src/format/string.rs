@@ -1,11 +1,11 @@
 use prettify::{concat, string, PrettifyDoc};
 
 fn count_single_quotes(s: &str) -> usize {
-    s.matches("'").count()
+    s.matches('\'').count()
 }
 
 fn count_double_quotes(s: &str) -> usize {
-    s.matches("\"").count()
+    s.matches('\"').count()
 }
 
 fn convert_to_single_quoted_string(s: &str) -> String {

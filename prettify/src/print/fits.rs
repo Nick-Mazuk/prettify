@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 pub fn fits<'a>(
     next: &Command<'a>,
-    rest_commands: &Commands<'a>,
+    #[allow(clippy::ptr_arg)] rest_commands: &Commands<'a>,
     width: usize,
     doc_options: &DocOptions<'a>,
     has_line_suffix_default: bool,

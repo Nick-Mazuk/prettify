@@ -32,7 +32,7 @@ pub fn float(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     let (remainder, (sign, integer, _, fraction, exponent)) = alt((
         tuple((
             opt_sign,
-            map(is_a("0123456789_"), |result| Some(result)),
+            map(is_a("0123456789_"), Some),
             opt(tag(".")),
             opt(is_a("0123456789_")),
             opt(parse_exponent),
@@ -41,7 +41,7 @@ pub fn float(input: &str) -> nom::IResult<&str, PrettifyDoc> {
             opt_sign,
             opt(is_a("0123456789_")),
             opt(tag(".")),
-            map(is_a("0123456789_"), |result| Some(result)),
+            map(is_a("0123456789_"), Some),
             opt(parse_exponent),
         )),
     ))(input)?;
@@ -55,7 +55,7 @@ pub fn float(input: &str) -> nom::IResult<&str, PrettifyDoc> {
             string(add_integer_underscores_reverse(trim_value(
                 fraction.unwrap_or(""),
             ))),
-            exponent.unwrap_or(string("")),
+            exponent.unwrap_or_else(|| string("")),
         ]),
     ))
 }

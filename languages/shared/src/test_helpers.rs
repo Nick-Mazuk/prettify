@@ -1,10 +1,7 @@
 use prettify::{print, PrettifyDoc};
 
 pub fn assert_errors<T>(response: nom::IResult<&str, T>) {
-    assert!(match response {
-        Ok(_) => false,
-        Err(_) => true,
-    })
+    assert!(response.is_err())
 }
 
 pub fn assert_formatted<'a>(
