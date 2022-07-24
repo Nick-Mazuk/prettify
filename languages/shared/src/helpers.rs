@@ -1,4 +1,5 @@
-use nom::{branch::alt, bytes::complete::tag};
+use nom::{branch::alt, bytes::complete::tag, combinator::opt};
+use prettify::{string, PrettifyDoc};
 
 pub fn trim_value(input: &str) -> &str {
     let value = input
@@ -11,24 +12,28 @@ pub fn trim_value(input: &str) -> &str {
     }
 }
 
-pub fn sign(input: &str) -> nom::IResult<&str, &str> {
-    alt((tag("-"), tag("+")))(input)
+pub fn sign(input: &str) -> nom::IResult<&str, PrettifyDoc> {
+    let (remainder, char) = alt((tag("-"), tag("+")))(input)?;
+    Ok((
+        remainder,
+        if char == "-" {
+            string("-")
+        } else {
+            string("+")
+        },
+    ))
 }
 
-pub fn sign_is_positive(input: &str) -> bool {
-    match input {
-        "+" => true,
-        "-" => false,
-        _ => unreachable!(),
-    }
-}
-
-pub fn optional_sign_is_positive(input: Option<&str>) -> bool {
-    match input {
-        Some("+") | None => true,
-        Some("-") => false,
-        _ => unreachable!(),
-    }
+pub fn opt_sign(input: &str) -> nom::IResult<&str, PrettifyDoc> {
+    let (remainder, char) = opt(alt((tag("-"), tag("+"))))(input)?;
+    Ok((
+        remainder,
+        match char {
+            Some("+") | None => string(""),
+            Some("-") => string("-"),
+            _ => unreachable!(),
+        },
+    ))
 }
 
 pub fn add_integer_underscores_every_n(value: &str, n: usize) -> String {

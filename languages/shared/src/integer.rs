@@ -1,10 +1,10 @@
-use crate::helpers::{optional_sign_is_positive, sign, trim_value};
+use crate::helpers::{opt_sign, trim_value};
 use crate::{add_integer_underscores, add_integer_underscores_every_n};
 use nom::{
     branch::alt,
-    bytes::complete::{is_a, tag, tag_no_case},
+    bytes::complete::{is_a, tag_no_case},
     character::complete::multispace1,
-    combinator::{eof, opt, peek},
+    combinator::{eof, peek},
     sequence::tuple,
 };
 use prettify::{concat, string, PrettifyDoc};
@@ -31,15 +31,11 @@ pub fn integer(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 }
 
 fn decimal_integer(input: &str) -> nom::IResult<&str, PrettifyDoc> {
-    let (input, (sign, value)) = tuple((opt(sign), is_a("0123456789_")))(input)?;
+    let (input, (sign, value)) = tuple((opt_sign, is_a("0123456789_")))(input)?;
     Ok((
         input,
         concat(vec![
-            string(if !optional_sign_is_positive(sign) {
-                "-"
-            } else {
-                ""
-            }),
+            sign,
             string(add_integer_underscores(trim_value(value))),
         ]),
     ))
@@ -47,7 +43,7 @@ fn decimal_integer(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 
 fn hexadecimal_integer(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     let (input, (sign, _, value)) = tuple((
-        opt(alt((tag("-"), tag("+")))),
+        opt_sign,
         tag_no_case("0x"),
         alt((
             is_a("abcdefABCDEF0123456789_"),
@@ -58,11 +54,7 @@ fn hexadecimal_integer(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     Ok((
         input,
         concat(vec![
-            string(if !optional_sign_is_positive(sign) {
-                "-"
-            } else {
-                ""
-            }),
+            sign,
             string("0x"),
             string(add_integer_underscores_every_n(trim_value(value), 4).to_ascii_lowercase()),
         ]),
@@ -71,18 +63,14 @@ fn hexadecimal_integer(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 
 fn octal_integer(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     let (input, (sign, _, value)) = tuple((
-        opt(alt((tag("-"), tag("+")))),
+        opt_sign,
         tag_no_case("0o"),
         alt((is_a("01234567_"), peek(multispace1), peek(eof))),
     ))(input)?;
     Ok((
         input,
         concat(vec![
-            string(if !optional_sign_is_positive(sign) {
-                "-"
-            } else {
-                ""
-            }),
+            sign,
             string("0o"),
             string(add_integer_underscores_every_n(trim_value(value), 4)),
         ]),
@@ -91,18 +79,14 @@ fn octal_integer(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 
 fn binary_integer(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     let (input, (sign, _, value)) = tuple((
-        opt(alt((tag("-"), tag("+")))),
+        opt_sign,
         tag_no_case("0b"),
         alt((is_a("01_"), peek(multispace1), peek(eof))),
     ))(input)?;
     Ok((
         input,
         concat(vec![
-            string(if !optional_sign_is_positive(sign) {
-                "-"
-            } else {
-                ""
-            }),
+            sign,
             string("0b"),
             string(add_integer_underscores_every_n(trim_value(value), 8)),
         ]),

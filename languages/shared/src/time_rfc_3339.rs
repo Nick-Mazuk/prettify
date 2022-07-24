@@ -1,4 +1,4 @@
-use crate::helpers::{sign, sign_is_positive};
+use crate::helpers::sign;
 use nom::{
     branch::alt,
     bytes::complete::{tag, tag_no_case, take_while_m_n},
@@ -63,15 +63,7 @@ fn time_offset_z(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 fn time_offset_number_offset(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     let (remainder, (sign, hour, _, minute)) =
         tuple((sign, rfc_3339_hour, tag(":"), rfc_3339_minute))(input)?;
-    Ok((
-        remainder,
-        concat(vec![
-            string(if sign_is_positive(sign) { "+" } else { "-" }),
-            hour,
-            string(":"),
-            minute,
-        ]),
-    ))
+    Ok((remainder, concat(vec![sign, hour, string(":"), minute])))
 }
 
 pub fn rfc_3339_time_offset(input: &str) -> nom::IResult<&str, PrettifyDoc> {

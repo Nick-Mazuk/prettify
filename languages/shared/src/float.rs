@@ -1,5 +1,6 @@
-use crate::helpers::{optional_sign_is_positive, sign, trim_value};
-use crate::{add_integer_underscores, add_integer_underscores_reverse};
+use crate::helpers::{
+    add_integer_underscores, add_integer_underscores_reverse, opt_sign, trim_value,
+};
 use nom::{
     branch::alt,
     bytes::complete::{is_a, tag, tag_no_case},
@@ -10,17 +11,13 @@ use prettify::{concat, string, PrettifyDoc};
 
 fn parse_exponent(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     let (remainder, (sign, digits)) =
-        preceded(tag_no_case("e"), tuple((opt(sign), is_a("0123456789_"))))(input)?;
+        preceded(tag_no_case("e"), tuple((opt_sign, is_a("0123456789_"))))(input)?;
 
     Ok((
         remainder,
         concat(vec![
             string("e"),
-            string(if !optional_sign_is_positive(sign) {
-                "-"
-            } else {
-                ""
-            }),
+            sign,
             string(add_integer_underscores(trim_value(digits))),
         ]),
     ))
@@ -34,14 +31,14 @@ fn parse_exponent(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 pub fn float(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     let (remainder, (sign, integer, _, fraction, exponent)) = alt((
         tuple((
-            opt(sign),
+            opt_sign,
             map(is_a("0123456789_"), |result| Some(result)),
             opt(tag(".")),
             opt(is_a("0123456789_")),
             opt(parse_exponent),
         )),
         tuple((
-            opt(sign),
+            opt_sign,
             opt(is_a("0123456789_")),
             opt(tag(".")),
             map(is_a("0123456789_"), |result| Some(result)),
@@ -52,11 +49,7 @@ pub fn float(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     Ok((
         remainder,
         concat(vec![
-            string(if !optional_sign_is_positive(sign) {
-                "-"
-            } else {
-                ""
-            }),
+            sign,
             string(add_integer_underscores(trim_value(integer.unwrap_or("")))),
             string("."),
             string(add_integer_underscores_reverse(trim_value(
