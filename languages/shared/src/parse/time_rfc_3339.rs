@@ -8,7 +8,7 @@ use nom::{
 
 use crate::{RFC3339Date, RFC3339DateTime, RFC3339PartialTime, RFC3339Time, RFC3339TimeOffset};
 
-use super::helpers::{optional_sign_is_positive, sign};
+use super::helpers::{sign, sign_is_positive};
 
 pub fn is_digit(chr: char) -> bool {
     chr >= '0' && chr <= '9'
@@ -50,10 +50,10 @@ fn time_offset_z(input: &str) -> nom::IResult<&str, RFC3339TimeOffset> {
 
 fn time_offset_number_offset(input: &str) -> nom::IResult<&str, RFC3339TimeOffset> {
     let (remainder, (sign, hour, _, minute)) =
-        tuple((opt(sign), rfc_3339_hour, tag(":"), rfc_3339_minute))(input)?;
+        tuple((sign, rfc_3339_hour, tag(":"), rfc_3339_minute))(input)?;
     Ok((
         remainder,
-        RFC3339TimeOffset::NumberOffset(hour, minute, optional_sign_is_positive(sign)),
+        RFC3339TimeOffset::NumberOffset(hour, minute, sign_is_positive(sign)),
     ))
 }
 
@@ -199,10 +199,6 @@ mod test {
         assert_eq!(rfc_3339_time_offset("Z"), Ok(("", RFC3339TimeOffset::Z)));
         assert_eq!(
             rfc_3339_time_offset("+00:00"),
-            Ok(("", RFC3339TimeOffset::NumberOffset("00", "00", true)))
-        );
-        assert_eq!(
-            rfc_3339_time_offset("00:00"),
             Ok(("", RFC3339TimeOffset::NumberOffset("00", "00", true)))
         );
         assert_eq!(
