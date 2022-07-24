@@ -14,3 +14,18 @@ pub fn trim_value(input: &str) -> &str {
 pub fn sign(input: &str) -> nom::IResult<&str, &str> {
     alt((tag("-"), tag("+")))(input)
 }
+
+pub fn sign_is_positive(input: &str) -> bool {
+    match input {
+        "+" => true,
+        "-" => false,
+        _ => unreachable!(),
+    }
+}
+pub fn optional_sign_is_positive(input: Option<&str>) -> bool {
+    match input {
+        Some("+") | None => true,
+        Some("-") => false,
+        _ => unreachable!(),
+    }
+}

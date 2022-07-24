@@ -1,4 +1,4 @@
-use super::helpers::{sign, trim_value};
+use super::helpers::{optional_sign_is_positive, sign, trim_value};
 use crate::Float;
 use nom::{
     branch::alt,
@@ -37,10 +37,7 @@ pub fn float(input: &str) -> nom::IResult<&str, Float> {
     Ok((
         remainder,
         Float {
-            is_negative: match sign {
-                Some("-") => true,
-                _ => false,
-            },
+            is_negative: !optional_sign_is_positive(sign),
             integer: match integer {
                 Some(integer) => trim_value(integer),
                 None => "0",
