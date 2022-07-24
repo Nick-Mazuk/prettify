@@ -61,7 +61,7 @@ pub fn float(input: &str) -> nom::IResult<&str, Float> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::parse::assert_errors;
+    use crate::assert_errors;
 
     #[test]
     fn float_test() {
@@ -144,7 +144,7 @@ mod test {
             ))
         );
         assert_eq!(
-            float("1.0e-2_"),
+            float("1.0E-2_"),
             Ok((
                 "",
                 Float {

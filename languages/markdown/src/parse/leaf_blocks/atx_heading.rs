@@ -44,7 +44,7 @@ pub fn atx_heading(input: &str) -> nom::IResult<&str, LeafBlock> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use prettify_shared::parse::test_helpers::assert_errors;
+    use prettify_shared::assert_errors;
 
     #[test]
     fn atx_heading_test() {

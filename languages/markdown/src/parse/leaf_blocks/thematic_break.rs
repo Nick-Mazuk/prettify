@@ -37,7 +37,7 @@ pub fn thematic_break(input: &str) -> nom::IResult<&str, LeafBlock> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use prettify_shared::parse::test_helpers::assert_errors;
+    use prettify_shared::assert_errors;
 
     #[test]
     fn thematic_break_test() {
