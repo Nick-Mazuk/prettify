@@ -7,18 +7,20 @@ use nom::{
     sequence::tuple,
 };
 
+use super::helpers::{sign, trim_value};
+
 /**
- * Parses integers. It may be more forgiving than the specs in many languages,
- * but that allows for a better developer experience. Specifically, though,
- * this integer parser follows the JavaScript spec for integers.
- *
- * This function parses several types of integers:
- *
- * - Decimal integers: `0`, `123`, `-123`, `+123`, `1_2__34`
- * - Binary integers: `0b`, `0b0101`, `0b_0101`, `0b_0101_`, `0b_0101_0`
- * - Octal integers: `0o`, `0o0101`, `0o_0101`, `0o_0101_`, `0o_0101_0`
- * - Hexadecimal integers: `0x`, `0x0101`, `0x_0101`, `0x_0101_`, `0x_0101_0`
- */
+ Parses integers. It may be more forgiving than the specs in many languages,
+ but that allows for a better developer experience. Specifically, though,
+ this integer parser follows the JavaScript spec for integers.
+
+ This function parses several types of integers:
+
+ - Decimal integers: `0`, `123`, `-123`, `+123`, `1_2__34`
+ - Binary integers: `0b`, `0b0101`, `0b_0101`, `0b_0101_`, `0b_0101_0`
+ - Octal integers: `0o`, `0o0101`, `0o_0101`, `0o_0101_`, `0o_0101_0`
+ - Hexadecimal integers: `0x`, `0x0101`, `0x_0101`, `0x_0101_`, `0x_0101_0`
+*/
 pub fn integer(input: &str) -> nom::IResult<&str, Integer> {
     alt((
         binary_integer,
@@ -28,20 +30,8 @@ pub fn integer(input: &str) -> nom::IResult<&str, Integer> {
     ))(input)
 }
 
-fn trim_value(input: &str) -> &str {
-    let value = input
-        .trim_end_matches('_')
-        .trim_start_matches(|char| char == '_' || char == '0' || char == ' ');
-    if value == "" {
-        "0"
-    } else {
-        value
-    }
-}
-
 fn decimal_integer(input: &str) -> nom::IResult<&str, Integer> {
-    let (input, (sign, value)) =
-        tuple((opt(alt((tag("-"), tag("+")))), is_a("0123456789_")))(input)?;
+    let (input, (sign, value)) = tuple((opt(sign), is_a("0123456789_")))(input)?;
     let is_negative = match sign {
         Some("-") => true,
         _ => false,
