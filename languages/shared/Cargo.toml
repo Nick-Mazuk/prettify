@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 prettify = { path = "../../prettify", version = ">=0.3.0" }
 nom = "7"
+
