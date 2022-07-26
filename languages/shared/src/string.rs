@@ -1,8 +1,9 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag, take},
-    combinator::{map, peek},
-    multi::many_till,
+    character::complete::none_of,
+    combinator::{map, peek, recognize},
+    multi::{count, many_till},
     sequence::{delimited, preceded},
 };
 use prettify::{concat, string as prettify_string, PrettifyDoc};
@@ -16,21 +17,21 @@ pub enum StringFragment<'a> {
 
 pub fn unicode_escape_sequence(input: &str) -> nom::IResult<&str, StringFragment> {
     let (remainder, value) = alt((
-        preceded(tag("\\u"), take(4 as usize)),
-        preceded(tag("\\U"), take(8 as usize)),
+        preceded(tag("\\u"), recognize(count(none_of("\n\r"), 4))),
+        preceded(tag("\\U"), recognize(count(none_of("\n\r"), 8))),
     ))(input)?;
     Ok((remainder, StringFragment::EscapedUnicode(value)))
 }
 
 pub fn backslash_escape(input: &str) -> nom::IResult<&str, StringFragment> {
     map(
-        preceded(tag("\\"), take(1 as usize)),
+        preceded(tag("\\"), recognize(none_of("\n\r"))),
         StringFragment::Escaped,
     )(input)
 }
 
 pub fn unescaped_char(input: &str) -> nom::IResult<&str, StringFragment> {
-    map(take(1 as usize), StringFragment::Unescaped)(input)
+    map(recognize(none_of("\n\r")), StringFragment::Unescaped)(input)
 }
 
 pub fn parse_single_quoted_string(input: &str) -> nom::IResult<&str, Vec<StringFragment>> {
@@ -68,7 +69,10 @@ pub fn format_custom_quoted_string<'a>(
                         concat(vec![prettify_string("\\U"), prettify_string(value)])
                     }
                     StringFragment::Escaped(value) => {
-                        if options.backslash_escaped_characters.contains(value) || value == quote {
+                        if value == quote
+                            || value == "\\"
+                            || options.backslash_escaped_characters.contains(value)
+                        {
                             concat(vec![prettify_string("\\"), prettify_string(value)])
                         } else {
                             prettify_string(value)
@@ -159,7 +163,7 @@ pub fn parse_and_format_string<'a>(
 
 #[cfg(test)]
 mod test {
-    use crate::assert_formatted;
+    use crate::{assert_errors, assert_formatted};
 
     use super::*;
 
@@ -173,6 +177,11 @@ mod test {
             unicode_escape_sequence("\\U12345678"),
             Ok(("", StringFragment::EscapedUnicode("12345678")))
         );
+
+        assert_errors(unicode_escape_sequence("\\u123\n"));
+        assert_errors(unicode_escape_sequence("\\u123\r"));
+        assert_errors(unicode_escape_sequence("\\U1234567\n"));
+        assert_errors(unicode_escape_sequence("\\U1234567\r"));
     }
 
     #[test]
@@ -189,6 +198,9 @@ mod test {
             backslash_escape("\\'\\b"),
             Ok(("\\b", StringFragment::Escaped("'")))
         );
+
+        assert_errors(backslash_escape("\\\n"));
+        assert_errors(backslash_escape("\\\r"));
     }
 
     #[test]
@@ -201,6 +213,9 @@ mod test {
             unescaped_char("ab"),
             Ok(("b", StringFragment::Unescaped("a")))
         );
+
+        assert_errors(unescaped_char("\n"));
+        assert_errors(unescaped_char("\r"));
     }
 
     #[test]
@@ -404,6 +419,12 @@ mod test {
                 backslash_escaped_characters: "",
             })("\"\\\"\""),
             ("", "'\"'"),
+        );
+        assert_formatted(
+            parse_and_format_string(StringOptions {
+                backslash_escaped_characters: "",
+            })("'\\\\'"),
+            ("", "\"\\\\\""),
         );
     }
 }
