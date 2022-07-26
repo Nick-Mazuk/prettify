@@ -1,323 +1,69 @@
-use crate::{helpers::is_alphanumeric_or_underscore_or_dash, nodes::Key};
+use crate::helpers::is_alphanumeric_or_underscore_or_dash;
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_until, take_while1},
+    bytes::complete::{tag, take_while1},
     character::complete::space0,
+    combinator::map,
     multi::separated_list1,
     sequence::delimited,
 };
+use prettify::{join, string, PrettifyDoc};
 
-pub fn key(input: &str) -> nom::IResult<&str, Vec<Key>> {
-    separated_list1(
+use super::string::single_line_string;
+
+pub fn key(input: &str) -> nom::IResult<&str, PrettifyDoc> {
+    let (remainder, parts) = separated_list1(
         delimited(space0, tag("."), space0),
-        alt((quoted_key, bare_key)),
-    )(input)
+        alt((single_line_string, bare_key)),
+    )(input)?;
+    Ok((remainder, join(parts, string("."))))
 }
 
-fn bare_key(input: &str) -> nom::IResult<&str, Key> {
-    let (remainder, value) = take_while1(is_alphanumeric_or_underscore_or_dash)(input)?;
-    Ok((
-        remainder,
-        Key {
-            value,
-            quoted: false,
-        },
-    ))
-}
-
-fn quoted_key(input: &str) -> nom::IResult<&str, Key> {
-    let (remainder, value) = alt((
-        delimited(tag("\""), take_until("\""), tag("\"")),
-        delimited(tag("'"), take_until("'"), tag("'")),
-    ))(input)?;
-    Ok((
-        remainder,
-        Key {
-            value,
-            quoted: true,
-        },
-    ))
+fn bare_key(input: &str) -> nom::IResult<&str, PrettifyDoc> {
+    map(take_while1(is_alphanumeric_or_underscore_or_dash), string)(input)
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use prettify_shared::assert_formatted;
 
     #[test]
     fn bare_key_test() {
-        assert_eq!(
-            key("foo"),
-            Ok((
-                "",
-                vec![Key {
-                    value: "foo",
-                    quoted: false,
-                }]
-            ))
-        );
-        assert_eq!(
-            key("bare"),
-            Ok((
-                "",
-                vec![Key {
-                    value: "bare",
-                    quoted: false,
-                }]
-            ))
-        );
-        assert_eq!(
-            key("bare-key"),
-            Ok((
-                "",
-                vec![Key {
-                    value: "bare-key",
-                    quoted: false,
-                }]
-            ))
-        );
-        assert_eq!(
-            key("bare_key"),
-            Ok((
-                "",
-                vec![Key {
-                    value: "bare_key",
-                    quoted: false,
-                }]
-            ))
-        );
-        assert_eq!(
-            key("1234"),
-            Ok((
-                "",
-                vec![Key {
-                    value: "1234",
-                    quoted: false,
-                }]
-            ))
-        );
+        assert_formatted(key("foo"), ("", "foo"));
+        assert_formatted(key("bare"), ("", "bare"));
+        assert_formatted(key("bare-key"), ("", "bare-key"));
+        assert_formatted(key("bare_key"), ("", "bare_key"));
+        assert_formatted(key("1234"), ("", "1234"));
     }
 
     #[test]
     fn quoted_key_test() {
-        assert_eq!(
-            key("\"127.0.0.1\""),
-            Ok((
-                "",
-                vec![Key {
-                    value: "127.0.0.1",
-                    quoted: true,
-                }]
-            ))
-        );
-        assert_eq!(
-            key("'127.0.0.1'"),
-            Ok((
-                "",
-                vec![Key {
-                    value: "127.0.0.1",
-                    quoted: true,
-                }]
-            ))
-        );
-        assert_eq!(
+        assert_formatted(key("\"127.0.0.1\""), ("", "\"127.0.0.1\""));
+        assert_formatted(key("'127.0.0.1'"), ("", "'127.0.0.1'"));
+        assert_formatted(
             key("\"character encoding\""),
-            Ok((
-                "",
-                vec![Key {
-                    value: "character encoding",
-                    quoted: true,
-                }]
-            ))
+            ("", "\"character encoding\""),
         );
-        assert_eq!(
-            key("\"ʎǝʞ\""),
-            Ok((
-                "",
-                vec![Key {
-                    value: "ʎǝʞ",
-                    quoted: true,
-                }]
-            ))
-        );
-        assert_eq!(
-            key("'quoted \"value\"'"),
-            Ok((
-                "",
-                vec![Key {
-                    value: "quoted \"value\"",
-                    quoted: true,
-                }]
-            ))
-        );
-        assert_eq!(
-            key("\"\""),
-            Ok((
-                "",
-                vec![Key {
-                    value: "",
-                    quoted: true,
-                }]
-            ))
-        );
-        assert_eq!(
-            key("''"),
-            Ok((
-                "",
-                vec![Key {
-                    value: "",
-                    quoted: true,
-                }]
-            ))
-        );
+        assert_formatted(key("\"ʎǝʞ\""), ("", "\"ʎǝʞ\""));
+        assert_formatted(key("'quoted \"value\"'"), ("", "'quoted \"value\"'"));
+        assert_formatted(key("\"\""), ("", "\"\""));
+        assert_formatted(key("''"), ("", "''"));
     }
 
     #[test]
     fn joined_key_test() {
-        assert_eq!(
-            key("name"),
-            Ok((
-                "",
-                vec![Key {
-                    value: "name",
-                    quoted: false,
-                }]
-            ))
-        );
-        assert_eq!(
-            key("physical.color"),
-            Ok((
-                "",
-                vec![
-                    Key {
-                        value: "physical",
-                        quoted: false,
-                    },
-                    Key {
-                        value: "color",
-                        quoted: false,
-                    }
-                ]
-            ))
-        );
-        assert_eq!(
-            key("site.\"google.com\""),
-            Ok((
-                "",
-                vec![
-                    Key {
-                        value: "site",
-                        quoted: false,
-                    },
-                    Key {
-                        value: "google.com",
-                        quoted: true,
-                    }
-                ]
-            ))
-        );
-        assert_eq!(
+        assert_formatted(key("name"), ("", "name"));
+        assert_formatted(key("physical.color"), ("", "physical.color"));
+        assert_formatted(key("site.\"google.com\""), ("", "site.\"google.com\""));
+        assert_formatted(
             key("site.\"google.com\".example.co"),
-            Ok((
-                "",
-                vec![
-                    Key {
-                        value: "site",
-                        quoted: false,
-                    },
-                    Key {
-                        value: "google.com",
-                        quoted: true,
-                    },
-                    Key {
-                        value: "example",
-                        quoted: false,
-                    },
-                    Key {
-                        value: "co",
-                        quoted: false,
-                    }
-                ]
-            ))
+            ("", "site.\"google.com\".example.co"),
         );
-        assert_eq!(
-            key("fruit. color"),
-            Ok((
-                "",
-                vec![
-                    Key {
-                        value: "fruit",
-                        quoted: false,
-                    },
-                    Key {
-                        value: "color",
-                        quoted: false,
-                    }
-                ]
-            ))
-        );
-        assert_eq!(
-            key("fruit . flavor"),
-            Ok((
-                "",
-                vec![
-                    Key {
-                        value: "fruit",
-                        quoted: false,
-                    },
-                    Key {
-                        value: "flavor",
-                        quoted: false,
-                    }
-                ]
-            ))
-        );
-        assert_eq!(
-            key("fruit     .      flavor"),
-            Ok((
-                "",
-                vec![
-                    Key {
-                        value: "fruit",
-                        quoted: false,
-                    },
-                    Key {
-                        value: "flavor",
-                        quoted: false,
-                    }
-                ]
-            ))
-        );
-        assert_eq!(
-            key("fruit\t . \t flavor"),
-            Ok((
-                "",
-                vec![
-                    Key {
-                        value: "fruit",
-                        quoted: false,
-                    },
-                    Key {
-                        value: "flavor",
-                        quoted: false,
-                    }
-                ]
-            ))
-        );
-        assert_eq!(
-            key("3.14159"),
-            Ok((
-                "",
-                vec![
-                    Key {
-                        value: "3",
-                        quoted: false,
-                    },
-                    Key {
-                        value: "14159",
-                        quoted: false,
-                    }
-                ]
-            ))
-        );
+        assert_formatted(key("fruit. color"), ("", "fruit.color"));
+        assert_formatted(key("fruit . flavor"), ("", "fruit.flavor"));
+        assert_formatted(key("fruit     .      flavor"), ("", "fruit.flavor"));
+        assert_formatted(key("fruit\t . \t flavor"), ("", "fruit.flavor"));
+        assert_formatted(key("3.14159"), ("", "3.14159"));
     }
 }

@@ -2,7 +2,7 @@ use nom::{
     branch::alt,
     bytes::complete::is_not,
     character::complete::char,
-    combinator::{map, recognize},
+    combinator::{map, opt, recognize},
     sequence::tuple,
 };
 use prettify::{string, PrettifyDoc};
@@ -14,7 +14,11 @@ pub fn single_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
             backslash_escaped_characters: "btnfr",
         }),
         map(
-            recognize(tuple((char('\''), is_not("'\n\r"), char('\'')))),
+            recognize(tuple((
+                char('\''),
+                recognize(opt(is_not("'\n\r"))),
+                char('\''),
+            ))),
             string,
         ),
     ))(input)
@@ -27,6 +31,8 @@ mod test {
 
     #[test]
     fn single_line_string_test() {
+        assert_formatted(single_line_string("\"\""), ("", "\"\""));
+        assert_formatted(single_line_string("''"), ("", "''"));
         assert_formatted(single_line_string("\"foo\""), ("", "\"foo\""));
         assert_formatted(single_line_string("'foo'"), ("", "'foo'"));
         assert_formatted(single_line_string("\"foo\\'\""), ("", "\"foo'\""));
