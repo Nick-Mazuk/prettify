@@ -12,6 +12,7 @@ pub fn single_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     alt((
         double_quoted_string(StringOptions {
             backslash_escaped_characters: "btnfr",
+            allow_line_breaks: false,
         }),
         map(
             recognize(tuple((

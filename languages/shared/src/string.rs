@@ -1,6 +1,6 @@
 use nom::{
     branch::alt,
-    bytes::complete::tag,
+    bytes::complete::{tag, take},
     character::complete::none_of,
     combinator::{map, peek, recognize},
     multi::{count, many_till},
@@ -13,6 +13,12 @@ pub enum StringFragment<'a> {
     Unescaped(&'a str),
     EscapedUnicode(&'a str),
     Escaped(&'a str),
+}
+
+#[derive(PartialEq, Debug, Clone, Copy)]
+pub struct StringOptions<'a> {
+    pub backslash_escaped_characters: &'a str,
+    pub allow_line_breaks: bool,
 }
 
 pub fn unicode_escape_sequence(input: &str) -> nom::IResult<&str, StringFragment> {
@@ -34,23 +40,39 @@ pub fn unescaped_char(input: &str) -> nom::IResult<&str, StringFragment> {
     map(recognize(none_of("\n\r")), StringFragment::Unescaped)(input)
 }
 
-pub fn parse_single_quoted_string(input: &str) -> nom::IResult<&str, Vec<StringFragment>> {
+pub fn unescaped_char_multiline(input: &str) -> nom::IResult<&str, StringFragment> {
+    map(take(1 as usize), StringFragment::Unescaped)(input)
+}
+
+pub fn parse_custom_quoted_string<'a>(
+    quote: &'a str,
+    options: StringOptions<'a>,
+) -> impl FnMut(&'a str) -> nom::IResult<&'a str, Vec<StringFragment<'a>>> {
     delimited(
-        tag("'"),
+        tag(quote),
         map(
             many_till(
-                alt((unicode_escape_sequence, backslash_escape, unescaped_char)),
-                peek(tag("'")),
+                alt((
+                    unicode_escape_sequence,
+                    backslash_escape,
+                    if options.allow_line_breaks {
+                        unescaped_char_multiline
+                    } else {
+                        unescaped_char
+                    },
+                )),
+                peek(tag(quote)),
             ),
             |result| result.0,
         ),
-        tag("'"),
-    )(input)
+        tag(quote),
+    )
 }
 
-#[derive(PartialEq, Debug, Clone, Copy)]
-pub struct StringOptions<'a> {
-    pub backslash_escaped_characters: &'a str,
+pub fn parse_single_quoted_string<'a>(
+    options: StringOptions<'a>,
+) -> impl FnMut(&'a str) -> nom::IResult<&'a str, Vec<StringFragment<'a>>> {
+    parse_custom_quoted_string("'", options)
 }
 
 pub fn format_custom_quoted_string<'a>(
@@ -95,23 +117,15 @@ pub fn format_single_quoted_string<'a>(
 pub fn single_quoted_string<'a>(
     options: StringOptions<'a>,
 ) -> impl FnMut(&'a str) -> nom::IResult<&'a str, PrettifyDoc<'a>> {
-    map(parse_single_quoted_string, move |result| {
+    map(parse_single_quoted_string(options), move |result| {
         format_single_quoted_string(result, options)
     })
 }
 
-pub fn parse_double_quoted_string(input: &str) -> nom::IResult<&str, Vec<StringFragment>> {
-    delimited(
-        tag("\""),
-        map(
-            many_till(
-                alt((unicode_escape_sequence, backslash_escape, unescaped_char)),
-                peek(tag("\"")),
-            ),
-            |result| result.0,
-        ),
-        tag("\""),
-    )(input)
+pub fn parse_double_quoted_string<'a>(
+    options: StringOptions<'a>,
+) -> impl FnMut(&'a str) -> nom::IResult<&'a str, Vec<StringFragment<'a>>> {
+    parse_custom_quoted_string("\"", options)
 }
 
 pub fn format_double_quoted_string<'a>(
@@ -124,13 +138,18 @@ pub fn format_double_quoted_string<'a>(
 pub fn double_quoted_string<'a>(
     options: StringOptions<'a>,
 ) -> impl FnMut(&'a str) -> nom::IResult<&'a str, PrettifyDoc<'a>> {
-    map(parse_double_quoted_string, move |result| {
+    map(parse_double_quoted_string(options), move |result| {
         format_double_quoted_string(result, options)
     })
 }
 
-pub fn parse_string(input: &str) -> nom::IResult<&str, Vec<StringFragment>> {
-    alt((parse_single_quoted_string, parse_double_quoted_string))(input)
+pub fn parse_string<'a>(
+    options: StringOptions<'a>,
+) -> impl FnMut(&'a str) -> nom::IResult<&'a str, Vec<StringFragment<'a>>> {
+    alt((
+        parse_single_quoted_string(options),
+        parse_double_quoted_string(options),
+    ))
 }
 
 pub fn format_string<'a>(
@@ -158,14 +177,15 @@ pub fn format_string<'a>(
 pub fn parse_and_format_string<'a>(
     options: StringOptions<'a>,
 ) -> impl FnMut(&'a str) -> nom::IResult<&'a str, PrettifyDoc<'a>> {
-    map(parse_string, move |result| format_string(result, options))
+    map(parse_string(options), move |result| {
+        format_string(result, options)
+    })
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{assert_errors, assert_formatted};
-
     use super::*;
+    use crate::{assert_errors, assert_formatted};
 
     #[test]
     fn test_unicode_escape_sequence() {
@@ -219,20 +239,44 @@ mod test {
     }
 
     #[test]
-    fn test_parse_single_quoted_string() {
+    fn test_unescaped_char_multiline() {
         assert_eq!(
-            parse_single_quoted_string("'a'"),
+            unescaped_char_multiline("a"),
+            Ok(("", StringFragment::Unescaped("a")))
+        );
+        assert_eq!(
+            unescaped_char_multiline("ab"),
+            Ok(("b", StringFragment::Unescaped("a")))
+        );
+        assert_eq!(
+            unescaped_char_multiline("\n"),
+            Ok(("", StringFragment::Unescaped("\n")))
+        );
+        assert_eq!(
+            unescaped_char_multiline("\r"),
+            Ok(("", StringFragment::Unescaped("\r")))
+        );
+    }
+
+    #[test]
+    fn test_parse_single_quoted_string() {
+        let options = StringOptions {
+            allow_line_breaks: false,
+            backslash_escaped_characters: "",
+        };
+        assert_eq!(
+            parse_single_quoted_string(options)("'a'"),
             Ok(("", vec![StringFragment::Unescaped("a")]))
         );
         assert_eq!(
-            parse_single_quoted_string("'a\\b'"),
+            parse_single_quoted_string(options)("'a\\b'"),
             Ok((
                 "",
                 vec![StringFragment::Unescaped("a"), StringFragment::Escaped("b")]
             ))
         );
         assert_eq!(
-            parse_single_quoted_string("'a\\b\\''"),
+            parse_single_quoted_string(options)("'a\\b\\''"),
             Ok((
                 "",
                 vec![
@@ -243,7 +287,7 @@ mod test {
             ))
         );
         assert_eq!(
-            parse_single_quoted_string("'a\\u1234'"),
+            parse_single_quoted_string(options)("'a\\u1234'"),
             Ok((
                 "",
                 vec![
@@ -256,19 +300,23 @@ mod test {
 
     #[test]
     fn test_parse_double_quoted_string() {
+        let options = StringOptions {
+            allow_line_breaks: false,
+            backslash_escaped_characters: "",
+        };
         assert_eq!(
-            parse_double_quoted_string("\"a\""),
+            parse_double_quoted_string(options)("\"a\""),
             Ok(("", vec![StringFragment::Unescaped("a")]))
         );
         assert_eq!(
-            parse_double_quoted_string("\"a\\b\""),
+            parse_double_quoted_string(options)("\"a\\b\""),
             Ok((
                 "",
                 vec![StringFragment::Unescaped("a"), StringFragment::Escaped("b")]
             ))
         );
         assert_eq!(
-            parse_double_quoted_string("\"a\\b\\\"\""),
+            parse_double_quoted_string(options)("\"a\\b\\\"\""),
             Ok((
                 "",
                 vec![
@@ -279,7 +327,7 @@ mod test {
             ))
         );
         assert_eq!(
-            parse_double_quoted_string("\"a\\u1234\""),
+            parse_double_quoted_string(options)("\"a\\u1234\""),
             Ok((
                 "",
                 vec![
@@ -292,23 +340,27 @@ mod test {
 
     #[test]
     fn test_parse_string() {
+        let options = StringOptions {
+            allow_line_breaks: false,
+            backslash_escaped_characters: "",
+        };
         assert_eq!(
-            parse_string("\"a\""),
+            parse_string(options)("\"a\""),
             Ok(("", vec![StringFragment::Unescaped("a")]))
         );
         assert_eq!(
-            parse_string("'a'"),
+            parse_string(options)("'a'"),
             Ok(("", vec![StringFragment::Unescaped("a")]))
         );
         assert_eq!(
-            parse_string("'a\\b'"),
+            parse_string(options)("'a\\b'"),
             Ok((
                 "",
                 vec![StringFragment::Unescaped("a"), StringFragment::Escaped("b")]
             ))
         );
         assert_eq!(
-            parse_string("'a\\b\\''"),
+            parse_string(options)("'a\\b\\''"),
             Ok((
                 "",
                 vec![
@@ -325,24 +377,28 @@ mod test {
         assert_formatted(
             single_quoted_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("'a'"),
             ("", "'a'"),
         );
         assert_formatted(
             single_quoted_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("'\\a'"),
             ("", "'a'"),
         );
         assert_formatted(
             single_quoted_string(StringOptions {
                 backslash_escaped_characters: "a",
+                allow_line_breaks: false,
             })("'\\a'"),
             ("", "'\\a'"),
         );
         assert_formatted(
             single_quoted_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("'\\''"),
             ("", "'\\''"),
         );
@@ -353,24 +409,28 @@ mod test {
         assert_formatted(
             double_quoted_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("\"a\""),
             ("", "\"a\""),
         );
         assert_formatted(
             double_quoted_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("\"\\a\""),
             ("", "\"a\""),
         );
         assert_formatted(
             double_quoted_string(StringOptions {
                 backslash_escaped_characters: "a",
+                allow_line_breaks: false,
             })("\"\\a\""),
             ("", "\"\\a\""),
         );
         assert_formatted(
             double_quoted_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("\"\\\"\""),
             ("", "\"\\\"\""),
         );
@@ -381,48 +441,56 @@ mod test {
         assert_formatted(
             parse_and_format_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("\"a\""),
             ("", "\"a\""),
         );
         assert_formatted(
             parse_and_format_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("'a'"),
             ("", "\"a\""),
         );
         assert_formatted(
             parse_and_format_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("'\\a'"),
             ("", "\"a\""),
         );
         assert_formatted(
             parse_and_format_string(StringOptions {
                 backslash_escaped_characters: "a",
+                allow_line_breaks: false,
             })("'\\a'"),
             ("", "\"\\a\""),
         );
         assert_formatted(
             parse_and_format_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("'\\''"),
             ("", "\"'\""),
         );
         assert_formatted(
             parse_and_format_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("'\\\"'"),
             ("", "'\"'"),
         );
         assert_formatted(
             parse_and_format_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("\"\\\"\""),
             ("", "'\"'"),
         );
         assert_formatted(
             parse_and_format_string(StringOptions {
                 backslash_escaped_characters: "",
+                allow_line_breaks: false,
             })("'\\\\'"),
             ("", "\"\\\\\""),
         );
