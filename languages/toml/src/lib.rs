@@ -1,17 +1,15 @@
+use prettify::string;
+
 extern crate nom;
 extern crate prettify;
 
-mod format;
+mod boolean;
+mod comment;
 mod helpers;
-mod nodes;
-mod parse;
+mod key;
 
-use format::create_prettify_doc;
-use parse::parse_toml;
+mod string;
 
-pub fn format_toml(markdown: &str) -> Result<prettify::PrettifyDoc, &str> {
-    match parse_toml(markdown) {
-        Ok((_, nodes)) => Ok(create_prettify_doc(nodes)),
-        Err(_) => Err("Invalid markdown"),
-    }
+pub fn format_toml(_toml: &str) -> Result<prettify::PrettifyDoc, &str> {
+    Ok(string("hello"))
 }
