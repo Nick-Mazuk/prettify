@@ -8,14 +8,14 @@ use nom::{
 use prettify::{concat, string, PrettifyDoc};
 
 use crate::{
-    key::{key, raw_key},
+    key::{key, raw_key, KeyValuePair},
     line_endings::line_end_with_optional_comment,
 };
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct TableHeader<'a> {
     pub key: PrettifyDoc<'a>,
-    pub raw_key: Vec<&'a str>,
+    pub raw_key: KeyValuePair<'a>,
     pub repeated: bool,
 }
 
@@ -114,31 +114,31 @@ mod test {
     #[test]
     fn raw_table_header_test() {
         let header = raw_table_header("[foo]").unwrap().1;
-        assert_eq!(header.raw_key, vec!["foo"]);
+        assert_eq!(header.raw_key.raw_key, vec!["foo"]);
         assert_eq!(header.repeated, false);
 
         let header = raw_table_header("[[foo]]").unwrap().1;
-        assert_eq!(header.raw_key, vec!["foo"]);
+        assert_eq!(header.raw_key.raw_key, vec!["foo"]);
         assert_eq!(header.repeated, true);
 
         let header = raw_table_header("[foo]\n").unwrap().1;
-        assert_eq!(header.raw_key, vec!["foo"]);
+        assert_eq!(header.raw_key.raw_key, vec!["foo"]);
         assert_eq!(header.repeated, false);
 
         let header = raw_table_header("[[foo]]\n").unwrap().1;
-        assert_eq!(header.raw_key, vec!["foo"]);
+        assert_eq!(header.raw_key.raw_key, vec!["foo"]);
         assert_eq!(header.repeated, true);
 
         let header = raw_table_header("[foo.bar]").unwrap().1;
-        assert_eq!(header.raw_key, vec!["foo", "bar"]);
+        assert_eq!(header.raw_key.raw_key, vec!["foo", "bar"]);
         assert_eq!(header.repeated, false);
 
         let header = raw_table_header("[[foo.bar]]").unwrap().1;
-        assert_eq!(header.raw_key, vec!["foo", "bar"]);
+        assert_eq!(header.raw_key.raw_key, vec!["foo", "bar"]);
         assert_eq!(header.repeated, true);
 
         let header = raw_table_header("[foo.\"bar.fizz.buzz\"]").unwrap().1;
-        assert_eq!(header.raw_key, vec!["foo", "\"bar.fizz.buzz\""]);
+        assert_eq!(header.raw_key.raw_key, vec!["foo", "\"bar.fizz.buzz\""]);
         assert_eq!(header.repeated, false);
     }
 

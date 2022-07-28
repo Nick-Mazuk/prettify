@@ -13,6 +13,12 @@ use prettify_shared::{
     rfc_3339_partial_time,
 };
 
+#[derive(PartialEq, Debug, Clone)]
+pub struct KeyValuePair<'a> {
+    pub raw_key: Vec<&'a str>,
+    pub prettify_doc: PrettifyDoc<'a>,
+}
+
 pub fn value(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     alt((
         boolean,
