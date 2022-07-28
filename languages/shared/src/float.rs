@@ -78,6 +78,7 @@ mod test {
         assert_formatted(float("1.e2"), ("", "1.0e2"));
         assert_formatted(float(".7"), ("", "0.7"));
         assert_formatted(float(".7e-4"), ("", "0.7e-4"));
+        assert_formatted(float("0000001.000000000e0000010"), ("", "1.0e10"));
         assert_formatted(
             float("123456.1234567e12345678"),
             ("", "123_456.123_456_7e12_345_678"),
