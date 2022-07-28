@@ -1,6 +1,7 @@
 use crate::nodes::Table;
 
 mod boolean;
+mod comment;
 mod key;
 mod string;
 
