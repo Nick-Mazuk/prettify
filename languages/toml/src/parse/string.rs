@@ -13,6 +13,10 @@ use prettify_shared::{
     unicode_escape_sequence, StringOptions,
 };
 
+pub fn toml_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
+    alt((multi_line_string, single_line_string))(input)
+}
+
 pub fn single_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     alt((
         double_quoted_string(StringOptions {
@@ -73,6 +77,14 @@ pub fn multi_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 mod test {
     use super::*;
     use prettify_shared::{assert_errors, assert_formatted};
+
+    #[test]
+    fn test_toml_string() {
+        assert_formatted(toml_string("\"\""), ("", "\"\""));
+        assert_formatted(toml_string("''"), ("", "''"));
+        assert_formatted(toml_string("\"\"\"\"\"\""), ("", "\"\"\"\"\"\""));
+        assert_formatted(toml_string("''''''"), ("", "''''''"));
+    }
 
     #[test]
     fn single_line_string_test() {
