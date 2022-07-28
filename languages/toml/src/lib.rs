@@ -9,6 +9,7 @@ mod key;
 mod key_value_pair;
 mod line_endings;
 mod string;
+mod table;
 
 pub fn format_toml(_toml: &str) -> Result<prettify::PrettifyDoc, &str> {
     Ok(string("hello"))
