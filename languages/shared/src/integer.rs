@@ -120,6 +120,7 @@ mod test {
         assert_formatted(integer("-0xdead_beef"), ("", "-0xdead_beef"));
         assert_formatted(integer("-0x10"), ("", "-0x10"));
         assert_formatted(integer("+0x10"), ("", "0x10"));
+        assert_formatted(integer("0x0001"), ("", "0x1"));
         assert_formatted(integer("0x"), ("", "0x0"));
         assert_formatted(integer("0x "), (" ", "0x0"));
         assert_formatted(integer("0x__0_"), ("", "0x0"));
@@ -133,6 +134,7 @@ mod test {
         assert_formatted(integer("-0o1234"), ("", "-0o1234"));
         assert_formatted(integer("-0o12_34"), ("", "-0o12_34"));
         assert_formatted(integer("-0o12_"), ("", "-0o12"));
+        assert_formatted(integer("0o0001"), ("", "0o1"));
         assert_formatted(integer("-0o"), ("", "-0o0"));
         assert_formatted(integer("+0o12_"), ("", "0o12"));
         assert_formatted(integer("0o"), ("", "0o0"));
@@ -148,5 +150,6 @@ mod test {
         assert_formatted(integer("-12_"), ("", "-12"));
         assert_formatted(integer("+12_"), ("", "12"));
         assert_formatted(integer("+12345"), ("", "12_345"));
+        assert_formatted(integer("0001"), ("", "1"));
     }
 }
