@@ -113,6 +113,15 @@ pub fn rfc_3339_date(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     ))
 }
 
+pub fn rfc_3339_local_date_time(input: &str) -> nom::IResult<&str, PrettifyDoc> {
+    let (remainder, (date, _, time)) = tuple((
+        rfc_3339_date,
+        alt((tag_no_case("T"), tag(" "))),
+        rfc_3339_partial_time,
+    ))(input)?;
+    Ok((remainder, concat(vec![date, string("T"), time])))
+}
+
 pub fn rfc_3339_date_time(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     let (remainder, (date, _, time)) = tuple((
         rfc_3339_date,
@@ -243,6 +252,22 @@ mod test {
     }
 
     #[test]
+    fn test_rfc_3339_local_date_time() {
+        assert_formatted(
+            rfc_3339_local_date_time("2000-01-01T01:01:01"),
+            ("", "2000-01-01T01:01:01"),
+        );
+        assert_formatted(
+            rfc_3339_local_date_time("2000-01-01 01:01:01.01"),
+            ("", "2000-01-01T01:01:01.01"),
+        );
+        assert_formatted(
+            rfc_3339_local_date_time("2017-01-01T00:00:00"),
+            ("", "2017-01-01T00:00:00"),
+        );
+    }
+
+    #[test]
     fn test_rfc_3339_date_time() {
         assert_formatted(
             rfc_3339_date_time("2000-01-01T01:01:01Z"),
@@ -251,6 +276,10 @@ mod test {
         assert_formatted(
             rfc_3339_date_time("2000-01-01 01:01:01.01-05:15"),
             ("", "2000-01-01T01:01:01.01-05:15"),
+        );
+        assert_formatted(
+            rfc_3339_date_time("2017-01-01T00:00:00Z"),
+            ("", "2017-01-01T00:00:00Z"),
         );
     }
 }

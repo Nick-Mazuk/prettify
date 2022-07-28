@@ -35,12 +35,19 @@ pub fn float(input: &str) -> nom::IResult<&str, PrettifyDoc> {
             map(is_a("0123456789_"), Some),
             opt(tag(".")),
             opt(is_a("0123456789_")),
+            map(parse_exponent, Some),
+        )),
+        tuple((
+            opt_sign,
+            map(is_a("0123456789_"), Some),
+            map(tag("."), Some),
+            opt(is_a("0123456789_")),
             opt(parse_exponent),
         )),
         tuple((
             opt_sign,
             opt(is_a("0123456789_")),
-            opt(tag(".")),
+            map(tag("."), Some),
             map(is_a("0123456789_"), Some),
             opt(parse_exponent),
         )),
@@ -93,5 +100,6 @@ mod test {
         assert_errors(float("-.e6"));
         assert_errors(float(".e6"));
         assert_errors(float("+.e6"));
+        assert_errors(float("123"));
     }
 }
