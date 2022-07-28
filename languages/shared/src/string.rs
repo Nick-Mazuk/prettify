@@ -69,12 +69,6 @@ pub fn parse_custom_quoted_string<'a>(
     )
 }
 
-pub fn parse_single_quoted_string<'a>(
-    options: StringOptions<'a>,
-) -> impl FnMut(&'a str) -> nom::IResult<&'a str, Vec<StringFragment<'a>>> {
-    parse_custom_quoted_string("'", options)
-}
-
 pub fn format_custom_quoted_string<'a>(
     quote: &'a str,
     fragments: Vec<StringFragment<'a>>,
@@ -87,9 +81,10 @@ pub fn format_custom_quoted_string<'a>(
                 .iter()
                 .map(|fragment| match *fragment {
                     StringFragment::Unescaped(value) => prettify_string(value),
-                    StringFragment::EscapedUnicode(value) => {
-                        concat(vec![prettify_string("\\U"), prettify_string(value)])
-                    }
+                    StringFragment::EscapedUnicode(value) => concat(vec![
+                        prettify_string(if value.len() == 4 { "\\u" } else { "\\U" }),
+                        prettify_string(value),
+                    ]),
                     StringFragment::Escaped(value) => {
                         if value == quote
                             || value == "\\"
@@ -105,6 +100,21 @@ pub fn format_custom_quoted_string<'a>(
         ),
         prettify_string(quote),
     ])
+}
+
+pub fn custom_quoted_string<'a>(
+    quote: &'a str,
+    options: StringOptions<'a>,
+) -> impl FnMut(&'a str) -> nom::IResult<&'a str, PrettifyDoc<'a>> {
+    map(parse_custom_quoted_string(quote, options), move |result| {
+        format_custom_quoted_string(quote, result, options)
+    })
+}
+
+pub fn parse_single_quoted_string<'a>(
+    options: StringOptions<'a>,
+) -> impl FnMut(&'a str) -> nom::IResult<&'a str, Vec<StringFragment<'a>>> {
+    parse_custom_quoted_string("'", options)
 }
 
 pub fn format_single_quoted_string<'a>(
