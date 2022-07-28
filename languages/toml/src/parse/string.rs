@@ -1,12 +1,17 @@
 use nom::{
     branch::alt,
-    bytes::complete::{is_not, tag, take_until},
+    bytes::complete::{is_not, tag, take},
     character::complete::char,
-    combinator::{map, opt, recognize},
-    sequence::tuple,
+    combinator::not,
+    combinator::{map, opt, peek, recognize},
+    multi::many_till,
+    sequence::{delimited, tuple},
 };
 use prettify::{string, PrettifyDoc};
-use prettify_shared::{custom_quoted_string, double_quoted_string, StringOptions};
+use prettify_shared::{
+    backslash_escape, double_quoted_string, format_custom_quoted_string, unescaped_char_multiline,
+    unicode_escape_sequence, StringOptions,
+};
 
 pub fn single_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     alt((
@@ -27,15 +32,38 @@ pub fn single_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 
 pub fn multi_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     alt((
-        custom_quoted_string(
-            "\"\"\"",
-            StringOptions {
-                backslash_escaped_characters: "btnfr\"",
-                allow_line_breaks: true,
+        map(
+            delimited(
+                tag("\"\"\""),
+                map(
+                    many_till(
+                        alt((
+                            unicode_escape_sequence,
+                            backslash_escape,
+                            unescaped_char_multiline,
+                        )),
+                        peek(tuple((tag("\"\"\""), not(tag("\""))))),
+                    ),
+                    |result| result.0,
+                ),
+                tuple((tag("\"\"\""), peek(not(tag("\""))))),
+            ),
+            |result| {
+                format_custom_quoted_string(
+                    "\"\"\"",
+                    result,
+                    StringOptions {
+                        backslash_escaped_characters: "btnfr\"",
+                        allow_line_breaks: true,
+                    },
+                )
             },
         ),
         map(
-            recognize(tuple((tag("'''"), take_until("'''"), tag("'''")))),
+            recognize(tuple((
+                tag("'''"),
+                many_till(take(1 as usize), tuple((tag("'''"), not(tag("'"))))),
+            ))),
             string,
         ),
     ))(input)
@@ -93,13 +121,63 @@ mod test {
 
     #[test]
     fn multi_line_string_test() {
+        assert_formatted(multi_line_string("\"\"\"\"\"\""), ("", "\"\"\"\"\"\""));
+        assert_formatted(multi_line_string("''''''"), ("", "''''''"));
+        assert_formatted(
+            multi_line_string("'''\nRoses are red\nViolets are blue'''"),
+            ("", "'''\nRoses are red\nViolets are blue'''"),
+        );
         assert_formatted(
             multi_line_string("\"\"\"\nRoses are red\nViolets are blue\"\"\""),
             ("", "\"\"\"\nRoses are red\nViolets are blue\"\"\""),
         );
         assert_formatted(
-            multi_line_string("'''\nRoses are red\nViolets are blue'''"),
-            ("", "'''\nRoses are red\nViolets are blue'''"),
+            multi_line_string("\"\"\"\"Roses are red\nViolets are blue\"\"\"\""),
+            ("", "\"\"\"\"Roses are red\nViolets are blue\"\"\"\""),
+        );
+
+        assert_formatted(
+            multi_line_string("\"\"\"Here are two quotation marks: \"\". Simple enough.\"\"\""),
+            (
+                "",
+                "\"\"\"Here are two quotation marks: \"\". Simple enough.\"\"\"",
+            ),
+        );
+        assert_formatted(
+            multi_line_string("\"\"\"Here are three quotation marks: \"\"\\\".\"\"\""),
+            ("", "\"\"\"Here are three quotation marks: \"\"\\\".\"\"\""),
+        );
+        assert_formatted(
+            multi_line_string("\"\"\"Here are fifteen quotation marks: \"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\".\"\"\""),
+            ("", "\"\"\"Here are fifteen quotation marks: \"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\".\"\"\""),
+        );
+        assert_formatted(
+            multi_line_string("\"\"\"\"This,\" she said, \"is just a pointless statement.\"\"\"\""),
+            (
+                "",
+                "\"\"\"\"This,\" she said, \"is just a pointless statement.\"\"\"\"",
+            ),
+        );
+        assert_formatted(
+            multi_line_string("'''I [dw]on't need \\d{2} apples'''"),
+            ("", "'''I [dw]on't need \\d{2} apples'''"),
+        );
+        assert_formatted(
+            multi_line_string("'''\nThe first newline is\ntrimmed in raw strings.\n   All other whitespace\n   is preserved.\n'''"),
+            ("", "'''\nThe first newline is\ntrimmed in raw strings.\n   All other whitespace\n   is preserved.\n'''"),
+        );
+        assert_formatted(
+            multi_line_string(
+                "'''Here are fifteen quotation marks: \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"'''",
+            ),
+            (
+                "",
+                "'''Here are fifteen quotation marks: \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"'''",
+            ),
+        );
+        assert_formatted(
+            multi_line_string("''''That,' she said, 'is still pointless.''''"),
+            ("", "''''That,' she said, 'is still pointless.''''"),
         );
     }
 }
