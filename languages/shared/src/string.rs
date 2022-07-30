@@ -41,7 +41,7 @@ impl<'a> StringOptions<'a> {
         }
     }
 
-    pub fn escaped_chars(mut self, backslash_escaped_characters: &'a str) -> Self {
+    pub fn backslash_escaped_characters(mut self, backslash_escaped_characters: &'a str) -> Self {
         self.backslash_escaped_characters = backslash_escaped_characters;
         self
     }
@@ -51,7 +51,7 @@ impl<'a> StringOptions<'a> {
         self
     }
 
-    pub fn preferred_quote(mut self, quote_type: QuoteType) -> Self {
+    pub fn preferred_quote_type(mut self, quote_type: QuoteType) -> Self {
         self.preferred_quote_type = Some(quote_type);
         self
     }
@@ -666,7 +666,7 @@ mod test {
         assert_formatted(single_quoted_string(options)("'a'"), ("", "'a'"));
         assert_formatted(single_quoted_string(options)("'\\a'"), ("", "'a'"));
         assert_formatted(
-            single_quoted_string(StringOptions::new().escaped_chars("a"))("'\\a'"),
+            single_quoted_string(StringOptions::new().backslash_escaped_characters("a"))("'\\a'"),
             ("", "'\\a'"),
         );
         assert_formatted(single_quoted_string(options)("'\\''"), ("", "'\\''"));
@@ -678,7 +678,7 @@ mod test {
         assert_formatted(double_quoted_string(options)("\"a\""), ("", "\"a\""));
         assert_formatted(double_quoted_string(options)("\"\\a\""), ("", "\"a\""));
         assert_formatted(
-            double_quoted_string(StringOptions::new().escaped_chars("a"))("\"\\a\""),
+            double_quoted_string(StringOptions::new().backslash_escaped_characters("a"))("\"\\a\""),
             ("", "\"\\a\""),
         );
         assert_formatted(double_quoted_string(options)("\"\\\"\""), ("", "\"\\\"\""));
@@ -691,7 +691,9 @@ mod test {
         assert_formatted(parse_and_format_string(options)("'a'"), ("", "\"a\""));
         assert_formatted(parse_and_format_string(options)("'\\a'"), ("", "\"a\""));
         assert_formatted(
-            parse_and_format_string(StringOptions::new().escaped_chars("a"))("'\\a'"),
+            parse_and_format_string(StringOptions::new().backslash_escaped_characters("a"))(
+                "'\\a'",
+            ),
             ("", "\"\\a\""),
         );
         assert_formatted(parse_and_format_string(options)("'\\''"), ("", "\"'\""));
@@ -700,13 +702,13 @@ mod test {
         assert_formatted(parse_and_format_string(options)("'\\\\'"), ("", "\"\\\\\""));
 
         assert_formatted(
-            parse_and_format_string(StringOptions::new().preferred_quote(QuoteType::Single))(
+            parse_and_format_string(StringOptions::new().preferred_quote_type(QuoteType::Single))(
                 "'\\\\'",
             ),
             ("", "'\\\\'"),
         );
         assert_formatted(
-            parse_and_format_string(StringOptions::new().preferred_quote(QuoteType::Double))(
+            parse_and_format_string(StringOptions::new().preferred_quote_type(QuoteType::Double))(
                 "\"\\\"\"",
             ),
             ("", "\"\\\"\""),

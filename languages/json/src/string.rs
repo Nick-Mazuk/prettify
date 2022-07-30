@@ -4,9 +4,9 @@ use prettify_shared::{parse_and_format_string, QuoteType, StringOptions};
 pub fn json_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     parse_and_format_string(
         StringOptions::new()
-            .escaped_chars("bfnrt")
+            .backslash_escaped_characters("bfnrt")
             .allow_unicode_4_digit_escape()
-            .preferred_quote(QuoteType::Double),
+            .preferred_quote_type(QuoteType::Double),
     )(input)
 }
 

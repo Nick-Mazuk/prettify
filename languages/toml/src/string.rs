@@ -21,7 +21,7 @@ pub fn single_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     alt((
         double_quoted_string(
             StringOptions::new()
-                .escaped_chars("btnfr")
+                .backslash_escaped_characters("btnfr")
                 .allow_unicode_4_digit_escape()
                 .allow_unicode_8_digit_escape(),
         ),
@@ -59,7 +59,7 @@ pub fn multi_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
                     "\"\"\"",
                     result,
                     StringOptions::new()
-                        .escaped_chars("btnfr\"")
+                        .backslash_escaped_characters("btnfr\"")
                         .allow_unicode_4_digit_escape()
                         .allow_unicode_8_digit_escape()
                         .allow_line_breaks(),
