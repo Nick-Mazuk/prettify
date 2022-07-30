@@ -561,6 +561,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "prettify-json"
+version = "0.1.0"
+dependencies = [
+ "nom",
+ "prettify",
+ "prettify-shared",
+]
+
+[[package]]
 name = "prettify-lua"
 version = "0.1.0"
 dependencies = [

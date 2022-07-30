@@ -3,7 +3,8 @@
 members = [
     "prettify",
     "cli",
+    "languages/json",
+    "languages/lua",
     "languages/markdown",
     "languages/toml",
-    "languages/lua",
 ]

@@ -19,10 +19,12 @@ pub fn toml_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
 
 pub fn single_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     alt((
-        double_quoted_string(StringOptions {
-            backslash_escaped_characters: "btnfr",
-            allow_line_breaks: false,
-        }),
+        double_quoted_string(
+            StringOptions::new()
+                .escaped_chars("btnfr")
+                .allow_unicode_4_digit_escape()
+                .allow_unicode_8_digit_escape(),
+        ),
         map(
             recognize(tuple((
                 char('\''),
@@ -56,10 +58,11 @@ pub fn multi_line_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
                 format_custom_quoted_string(
                     "\"\"\"",
                     result,
-                    StringOptions {
-                        backslash_escaped_characters: "btnfr\"",
-                        allow_line_breaks: true,
-                    },
+                    StringOptions::new()
+                        .escaped_chars("btnfr\"")
+                        .allow_unicode_4_digit_escape()
+                        .allow_unicode_8_digit_escape()
+                        .allow_line_breaks(),
                 )
             },
         ),

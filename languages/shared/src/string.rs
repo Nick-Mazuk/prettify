@@ -1,9 +1,9 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag, take},
-    character::complete::none_of,
-    combinator::{map, peek, recognize},
-    multi::{count, many_till},
+    character::complete::{none_of, one_of},
+    combinator::{cond, map, map_res, peek, recognize},
+    multi::{many_m_n, many_till},
     sequence::{delimited, preceded},
 };
 use prettify::{concat, string as prettify_string, PrettifyDoc};
@@ -16,17 +16,82 @@ pub enum StringFragment<'a> {
 }
 
 #[derive(PartialEq, Debug, Clone, Copy)]
+pub enum QuoteType {
+    Single,
+    Double,
+}
+
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub struct StringOptions<'a> {
     pub backslash_escaped_characters: &'a str,
     pub allow_line_breaks: bool,
+    pub preferred_quote_type: Option<QuoteType>,
+    pub allow_unicode_4_digit_escape: bool,
+    pub allow_unicode_8_digit_escape: bool,
+}
+
+impl<'a> StringOptions<'a> {
+    pub fn new() -> StringOptions<'a> {
+        StringOptions {
+            backslash_escaped_characters: "",
+            allow_line_breaks: false,
+            preferred_quote_type: None,
+            allow_unicode_4_digit_escape: false,
+            allow_unicode_8_digit_escape: false,
+        }
+    }
+
+    pub fn escaped_chars(mut self, backslash_escaped_characters: &'a str) -> Self {
+        self.backslash_escaped_characters = backslash_escaped_characters;
+        self
+    }
+
+    pub fn allow_line_breaks(mut self) -> Self {
+        self.allow_line_breaks = true;
+        self
+    }
+
+    pub fn preferred_quote(mut self, quote_type: QuoteType) -> Self {
+        self.preferred_quote_type = Some(quote_type);
+        self
+    }
+
+    pub fn allow_unicode_4_digit_escape(mut self) -> Self {
+        self.allow_unicode_4_digit_escape = true;
+        self
+    }
+
+    pub fn allow_unicode_8_digit_escape(mut self) -> Self {
+        self.allow_unicode_8_digit_escape = true;
+        self
+    }
+}
+
+pub fn unicode_4_digit_escape_sequence(input: &str) -> nom::IResult<&str, StringFragment> {
+    map(
+        preceded(
+            tag("\\u"),
+            recognize(many_m_n(4, 4, one_of("0123456789abcdefABCDEF"))),
+        ),
+        StringFragment::EscapedUnicode,
+    )(input)
+}
+
+pub fn unicode_8_digit_escape_sequence(input: &str) -> nom::IResult<&str, StringFragment> {
+    map(
+        preceded(
+            tag("\\U"),
+            recognize(many_m_n(8, 8, one_of("0123456789abcdefABCDEF"))),
+        ),
+        StringFragment::EscapedUnicode,
+    )(input)
 }
 
 pub fn unicode_escape_sequence(input: &str) -> nom::IResult<&str, StringFragment> {
-    let (remainder, value) = alt((
-        preceded(tag("\\u"), recognize(count(none_of("\n\r"), 4))),
-        preceded(tag("\\U"), recognize(count(none_of("\n\r"), 8))),
-    ))(input)?;
-    Ok((remainder, StringFragment::EscapedUnicode(value)))
+    alt((
+        unicode_4_digit_escape_sequence,
+        unicode_8_digit_escape_sequence,
+    ))(input)
 }
 
 pub fn backslash_escape(input: &str) -> nom::IResult<&str, StringFragment> {
@@ -53,7 +118,30 @@ pub fn parse_custom_quoted_string<'a>(
         map(
             many_till(
                 alt((
-                    unicode_escape_sequence,
+                    map_res(
+                        cond(
+                            options.allow_unicode_4_digit_escape,
+                            unicode_4_digit_escape_sequence,
+                        ),
+                        |result| {
+                            result.ok_or(nom::error::Error {
+                                code: nom::error::ErrorKind::MapRes,
+                                input: "",
+                            })
+                        },
+                    ),
+                    map_res(
+                        cond(
+                            options.allow_unicode_8_digit_escape,
+                            unicode_8_digit_escape_sequence,
+                        ),
+                        |result| {
+                            result.ok_or(nom::error::Error {
+                                code: nom::error::ErrorKind::MapRes,
+                                input: "",
+                            })
+                        },
+                    ),
                     backslash_escape,
                     if options.allow_line_breaks {
                         unescaped_char_multiline
@@ -166,21 +254,27 @@ pub fn format_string<'a>(
     fragments: Vec<StringFragment<'a>>,
     options: StringOptions<'a>,
 ) -> PrettifyDoc<'a> {
-    let mut single_quote_count = 0;
-    let mut double_quote_count = 0;
-    for fragment in fragments.iter() {
-        if let StringFragment::Escaped(value) = fragment {
-            if *value == "'" {
-                single_quote_count += 1;
-            } else if *value == "\"" {
-                double_quote_count += 1;
+    match options.preferred_quote_type {
+        Some(QuoteType::Single) => format_single_quoted_string(fragments, options),
+        Some(QuoteType::Double) => format_double_quoted_string(fragments, options),
+        None => {
+            let mut single_quote_count = 0;
+            let mut double_quote_count = 0;
+            for fragment in fragments.iter() {
+                if let StringFragment::Escaped(value) = fragment {
+                    if *value == "'" {
+                        single_quote_count += 1;
+                    } else if *value == "\"" {
+                        double_quote_count += 1;
+                    }
+                }
+            }
+            if single_quote_count < double_quote_count {
+                format_single_quoted_string(fragments, options)
+            } else {
+                format_double_quoted_string(fragments, options)
             }
         }
-    }
-    if single_quote_count < double_quote_count {
-        format_single_quoted_string(fragments, options)
-    } else {
-        format_double_quoted_string(fragments, options)
     }
 }
 
@@ -196,6 +290,35 @@ pub fn parse_and_format_string<'a>(
 mod test {
     use super::*;
     use crate::{assert_errors, assert_formatted};
+
+    #[test]
+    fn test_unicode_4_digit_escape_sequence() {
+        assert_eq!(
+            unicode_4_digit_escape_sequence("\\u1234"),
+            Ok(("", StringFragment::EscapedUnicode("1234")))
+        );
+
+        assert_errors(unicode_4_digit_escape_sequence("\\u123\n"));
+        assert_errors(unicode_4_digit_escape_sequence("\\u123\r"));
+        assert_errors(unicode_4_digit_escape_sequence("\\u123"));
+        assert_errors(unicode_4_digit_escape_sequence("\\u122z"));
+        assert_errors(unicode_4_digit_escape_sequence("\\U1223"));
+    }
+
+    #[test]
+    fn test_unicode_8_digit_escape_sequence() {
+        assert_eq!(
+            unicode_8_digit_escape_sequence("\\U12345678"),
+            Ok(("", StringFragment::EscapedUnicode("12345678")))
+        );
+
+        assert_errors(unicode_8_digit_escape_sequence("\\U1234567\n"));
+        assert_errors(unicode_8_digit_escape_sequence("\\U1234567\r"));
+        assert_errors(unicode_8_digit_escape_sequence("\\U1234567"));
+        assert_errors(unicode_8_digit_escape_sequence("\\U1234567z"));
+        assert_errors(unicode_8_digit_escape_sequence("\\U1234567"));
+        assert_errors(unicode_8_digit_escape_sequence("\\u12345678"));
+    }
 
     #[test]
     fn test_unicode_escape_sequence() {
@@ -270,10 +393,7 @@ mod test {
 
     #[test]
     fn test_parse_single_quoted_string() {
-        let options = StringOptions {
-            allow_line_breaks: false,
-            backslash_escaped_characters: "",
-        };
+        let options = StringOptions::new();
         assert_eq!(
             parse_single_quoted_string(options)("'a'"),
             Ok(("", vec![StringFragment::Unescaped("a")]))
@@ -302,7 +422,89 @@ mod test {
                 "",
                 vec![
                     StringFragment::Unescaped("a"),
+                    StringFragment::Escaped("u"),
+                    StringFragment::Unescaped("1"),
+                    StringFragment::Unescaped("2"),
+                    StringFragment::Unescaped("3"),
+                    StringFragment::Unescaped("4"),
+                ]
+            ))
+        );
+        assert_eq!(
+            parse_single_quoted_string(StringOptions::new().allow_unicode_4_digit_escape())(
+                "'a\\u1234'"
+            ),
+            Ok((
+                "",
+                vec![
+                    StringFragment::Unescaped("a"),
                     StringFragment::EscapedUnicode("1234"),
+                ]
+            ))
+        );
+        assert_eq!(
+            parse_single_quoted_string(StringOptions::new().allow_unicode_8_digit_escape())(
+                "'a\\u1234'"
+            ),
+            Ok((
+                "",
+                vec![
+                    StringFragment::Unescaped("a"),
+                    StringFragment::Escaped("u"),
+                    StringFragment::Unescaped("1"),
+                    StringFragment::Unescaped("2"),
+                    StringFragment::Unescaped("3"),
+                    StringFragment::Unescaped("4"),
+                ]
+            ))
+        );
+        assert_eq!(
+            parse_single_quoted_string(options)("'a\\U12345678'"),
+            Ok((
+                "",
+                vec![
+                    StringFragment::Unescaped("a"),
+                    StringFragment::Escaped("U"),
+                    StringFragment::Unescaped("1"),
+                    StringFragment::Unescaped("2"),
+                    StringFragment::Unescaped("3"),
+                    StringFragment::Unescaped("4"),
+                    StringFragment::Unescaped("5"),
+                    StringFragment::Unescaped("6"),
+                    StringFragment::Unescaped("7"),
+                    StringFragment::Unescaped("8"),
+                ]
+            ))
+        );
+        assert_eq!(
+            parse_single_quoted_string(StringOptions::new().allow_unicode_8_digit_escape())(
+                "'a\\U12345678'"
+            ),
+            Ok((
+                "",
+                vec![
+                    StringFragment::Unescaped("a"),
+                    StringFragment::EscapedUnicode("12345678"),
+                ]
+            ))
+        );
+        assert_eq!(
+            parse_single_quoted_string(StringOptions::new().allow_unicode_4_digit_escape())(
+                "'a\\U12345678'"
+            ),
+            Ok((
+                "",
+                vec![
+                    StringFragment::Unescaped("a"),
+                    StringFragment::Escaped("U"),
+                    StringFragment::Unescaped("1"),
+                    StringFragment::Unescaped("2"),
+                    StringFragment::Unescaped("3"),
+                    StringFragment::Unescaped("4"),
+                    StringFragment::Unescaped("5"),
+                    StringFragment::Unescaped("6"),
+                    StringFragment::Unescaped("7"),
+                    StringFragment::Unescaped("8"),
                 ]
             ))
         );
@@ -310,10 +512,7 @@ mod test {
 
     #[test]
     fn test_parse_double_quoted_string() {
-        let options = StringOptions {
-            allow_line_breaks: false,
-            backslash_escaped_characters: "",
-        };
+        let options = StringOptions::new();
         assert_eq!(
             parse_double_quoted_string(options)("\"a\""),
             Ok(("", vec![StringFragment::Unescaped("a")]))
@@ -342,7 +541,89 @@ mod test {
                 "",
                 vec![
                     StringFragment::Unescaped("a"),
+                    StringFragment::Escaped("u"),
+                    StringFragment::Unescaped("1"),
+                    StringFragment::Unescaped("2"),
+                    StringFragment::Unescaped("3"),
+                    StringFragment::Unescaped("4"),
+                ]
+            ))
+        );
+        assert_eq!(
+            parse_double_quoted_string(StringOptions::new().allow_unicode_4_digit_escape())(
+                "\"a\\u1234\""
+            ),
+            Ok((
+                "",
+                vec![
+                    StringFragment::Unescaped("a"),
                     StringFragment::EscapedUnicode("1234"),
+                ]
+            ))
+        );
+        assert_eq!(
+            parse_double_quoted_string(StringOptions::new().allow_unicode_8_digit_escape())(
+                "\"a\\u1234\""
+            ),
+            Ok((
+                "",
+                vec![
+                    StringFragment::Unescaped("a"),
+                    StringFragment::Escaped("u"),
+                    StringFragment::Unescaped("1"),
+                    StringFragment::Unescaped("2"),
+                    StringFragment::Unescaped("3"),
+                    StringFragment::Unescaped("4"),
+                ]
+            ))
+        );
+        assert_eq!(
+            parse_double_quoted_string(options)("\"a\\U12345678\""),
+            Ok((
+                "",
+                vec![
+                    StringFragment::Unescaped("a"),
+                    StringFragment::Escaped("U"),
+                    StringFragment::Unescaped("1"),
+                    StringFragment::Unescaped("2"),
+                    StringFragment::Unescaped("3"),
+                    StringFragment::Unescaped("4"),
+                    StringFragment::Unescaped("5"),
+                    StringFragment::Unescaped("6"),
+                    StringFragment::Unescaped("7"),
+                    StringFragment::Unescaped("8"),
+                ]
+            ))
+        );
+        assert_eq!(
+            parse_double_quoted_string(StringOptions::new().allow_unicode_8_digit_escape())(
+                "\"a\\U12345678\""
+            ),
+            Ok((
+                "",
+                vec![
+                    StringFragment::Unescaped("a"),
+                    StringFragment::EscapedUnicode("12345678"),
+                ]
+            ))
+        );
+        assert_eq!(
+            parse_double_quoted_string(StringOptions::new().allow_unicode_4_digit_escape())(
+                "\"a\\U12345678\""
+            ),
+            Ok((
+                "",
+                vec![
+                    StringFragment::Unescaped("a"),
+                    StringFragment::Escaped("U"),
+                    StringFragment::Unescaped("1"),
+                    StringFragment::Unescaped("2"),
+                    StringFragment::Unescaped("3"),
+                    StringFragment::Unescaped("4"),
+                    StringFragment::Unescaped("5"),
+                    StringFragment::Unescaped("6"),
+                    StringFragment::Unescaped("7"),
+                    StringFragment::Unescaped("8"),
                 ]
             ))
         );
@@ -350,10 +631,7 @@ mod test {
 
     #[test]
     fn test_parse_string() {
-        let options = StringOptions {
-            allow_line_breaks: false,
-            backslash_escaped_characters: "",
-        };
+        let options = StringOptions::new();
         assert_eq!(
             parse_string(options)("\"a\""),
             Ok(("", vec![StringFragment::Unescaped("a")]))
@@ -384,125 +662,54 @@ mod test {
 
     #[test]
     fn test_single_quoted_string() {
+        let options = StringOptions::new();
+        assert_formatted(single_quoted_string(options)("'a'"), ("", "'a'"));
+        assert_formatted(single_quoted_string(options)("'\\a'"), ("", "'a'"));
         assert_formatted(
-            single_quoted_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("'a'"),
-            ("", "'a'"),
-        );
-        assert_formatted(
-            single_quoted_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("'\\a'"),
-            ("", "'a'"),
-        );
-        assert_formatted(
-            single_quoted_string(StringOptions {
-                backslash_escaped_characters: "a",
-                allow_line_breaks: false,
-            })("'\\a'"),
+            single_quoted_string(StringOptions::new().escaped_chars("a"))("'\\a'"),
             ("", "'\\a'"),
         );
-        assert_formatted(
-            single_quoted_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("'\\''"),
-            ("", "'\\''"),
-        );
+        assert_formatted(single_quoted_string(options)("'\\''"), ("", "'\\''"));
     }
 
     #[test]
     fn test_double_quoted_string() {
+        let options = StringOptions::new();
+        assert_formatted(double_quoted_string(options)("\"a\""), ("", "\"a\""));
+        assert_formatted(double_quoted_string(options)("\"\\a\""), ("", "\"a\""));
         assert_formatted(
-            double_quoted_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("\"a\""),
-            ("", "\"a\""),
-        );
-        assert_formatted(
-            double_quoted_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("\"\\a\""),
-            ("", "\"a\""),
-        );
-        assert_formatted(
-            double_quoted_string(StringOptions {
-                backslash_escaped_characters: "a",
-                allow_line_breaks: false,
-            })("\"\\a\""),
+            double_quoted_string(StringOptions::new().escaped_chars("a"))("\"\\a\""),
             ("", "\"\\a\""),
         );
-        assert_formatted(
-            double_quoted_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("\"\\\"\""),
-            ("", "\"\\\"\""),
-        );
+        assert_formatted(double_quoted_string(options)("\"\\\"\""), ("", "\"\\\"\""));
     }
 
     #[test]
     fn test_parse_and_format_string() {
+        let options = StringOptions::new();
+        assert_formatted(parse_and_format_string(options)("\"a\""), ("", "\"a\""));
+        assert_formatted(parse_and_format_string(options)("'a'"), ("", "\"a\""));
+        assert_formatted(parse_and_format_string(options)("'\\a'"), ("", "\"a\""));
         assert_formatted(
-            parse_and_format_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("\"a\""),
-            ("", "\"a\""),
-        );
-        assert_formatted(
-            parse_and_format_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("'a'"),
-            ("", "\"a\""),
-        );
-        assert_formatted(
-            parse_and_format_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("'\\a'"),
-            ("", "\"a\""),
-        );
-        assert_formatted(
-            parse_and_format_string(StringOptions {
-                backslash_escaped_characters: "a",
-                allow_line_breaks: false,
-            })("'\\a'"),
+            parse_and_format_string(StringOptions::new().escaped_chars("a"))("'\\a'"),
             ("", "\"\\a\""),
         );
+        assert_formatted(parse_and_format_string(options)("'\\''"), ("", "\"'\""));
+        assert_formatted(parse_and_format_string(options)("'\\\"'"), ("", "'\"'"));
+        assert_formatted(parse_and_format_string(options)("\"\\\"\""), ("", "'\"'"));
+        assert_formatted(parse_and_format_string(options)("'\\\\'"), ("", "\"\\\\\""));
+
         assert_formatted(
-            parse_and_format_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("'\\''"),
-            ("", "\"'\""),
+            parse_and_format_string(StringOptions::new().preferred_quote(QuoteType::Single))(
+                "'\\\\'",
+            ),
+            ("", "'\\\\'"),
         );
         assert_formatted(
-            parse_and_format_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("'\\\"'"),
-            ("", "'\"'"),
-        );
-        assert_formatted(
-            parse_and_format_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("\"\\\"\""),
-            ("", "'\"'"),
-        );
-        assert_formatted(
-            parse_and_format_string(StringOptions {
-                backslash_escaped_characters: "",
-                allow_line_breaks: false,
-            })("'\\\\'"),
-            ("", "\"\\\\\""),
+            parse_and_format_string(StringOptions::new().preferred_quote(QuoteType::Double))(
+                "\"\\\"\"",
+            ),
+            ("", "\"\\\"\""),
         );
     }
 }
