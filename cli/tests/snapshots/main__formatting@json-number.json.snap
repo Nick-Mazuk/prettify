@@ -1,0 +1,12 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/json/json-number.json
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+0
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

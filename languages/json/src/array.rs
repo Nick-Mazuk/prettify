@@ -43,5 +43,8 @@ mod test {
                 "[\n    [\n        \"hello\"\n    ],\n    [\"world\"]\n]",
             ),
         );
+        assert_formatted(array("['',]"), ("", "[\"\"]"));
+        assert_formatted(array("[null,]"), ("", "[null]"));
+        assert_formatted(array("[false,]"), ("", "[false]"));
     }
 }

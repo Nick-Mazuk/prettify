@@ -1,0 +1,12 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/json/json-single-line.json
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+{"key1": [true, false, null], "key2": {"key3": [1, 2, "3", 1.0e10, 1.0e-3]}}
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

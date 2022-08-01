@@ -1,0 +1,22 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/json/json-array.json
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+[
+    [
+        1,
+        null
+    ],
+    [1, null],
+    [null],
+    [0],
+    [false],
+    [""]
+]
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

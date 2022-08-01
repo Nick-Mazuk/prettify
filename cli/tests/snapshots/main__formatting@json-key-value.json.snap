@@ -1,0 +1,16 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/json/json-key-value.json
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+{
+    "string": "stringstringstringstringstringstringstringstringstringstringstringstringstringstringstring",
+    "stringstringstringstringstringstringstringstring": "stringstringstringstringstringstringstringstring",
+    "stringstringstringstringstringstringstringstringstringstringstringstringstringstringstring": "string"
+}
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

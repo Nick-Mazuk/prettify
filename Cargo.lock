@@ -556,6 +556,7 @@ dependencies = [
  "indoc",
  "insta",
  "prettify",
+ "prettify-json",
  "prettify-markdown",
  "prettify-toml",
 ]

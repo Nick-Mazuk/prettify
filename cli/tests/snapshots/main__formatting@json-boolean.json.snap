@@ -1,11 +1,11 @@
 ---
 source: cli/tests/main.rs
-assertion_line: 25
 expression: file
-input_file: cli/tests/files/toml/table/toml-comment-1.toml
+input_file: cli/tests/files/json/json-boolean.json
 ---
 |                                                                              | printWidth
 ----------------------------------start input-----------------------------------
+true
 
 -----------------------------------end input------------------------------------
 |                                                                              | printWidth

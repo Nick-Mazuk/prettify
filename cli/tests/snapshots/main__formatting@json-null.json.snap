@@ -1,0 +1,12 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/json/json-null.json
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+null
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+

@@ -1,4 +1,5 @@
 use prettify::print;
+use prettify_json::format_json;
 use prettify_markdown::format_markdown;
 use prettify_toml::format_toml;
 use std::time::Duration;
@@ -7,12 +8,14 @@ use std::time::Duration;
 pub enum Language {
     Markdown,
     Toml,
+    Json,
 }
 
 pub fn format_by_language(contents: &str, language: Language) -> String {
     let doc = match language {
         Language::Markdown => format_markdown(contents),
         Language::Toml => format_toml(contents),
+        Language::Json => format_json(contents),
     };
     match doc {
         Ok(doc) => print(doc),
@@ -31,6 +34,8 @@ pub fn get_language_from_filename(filename: &str) -> Option<Language> {
         Some(Language::Markdown)
     } else if filename.ends_with(".toml") {
         Some(Language::Toml)
+    } else if filename.ends_with(".json") {
+        Some(Language::Json)
     } else {
         None
     }

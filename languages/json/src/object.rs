@@ -59,7 +59,7 @@ mod test {
         );
         assert_formatted(
             object("{\"this is a long key\": 1234,\"this is a long key\": 1234,\"this is a long key\": 1234}"),
-            ("", "{\n    \"this is a long key\": 1_234,\n    \"this is a long key\": 1_234,\n    \"this is a long key\": 1_234\n}"),
+            ("", "{\n    \"this is a long key\": 1234,\n    \"this is a long key\": 1234,\n    \"this is a long key\": 1234\n}"),
         );
         assert_formatted(
             object("{\"hello\": {\"world\": 42}}"),

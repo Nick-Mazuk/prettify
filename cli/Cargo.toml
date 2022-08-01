@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+"prettify-json" = { path = "../languages/json" }
 "prettify-markdown" = { path = "../languages/markdown" }
 "prettify-toml" = { path = "../languages/toml" }
 "prettify" = { path = "../prettify" }

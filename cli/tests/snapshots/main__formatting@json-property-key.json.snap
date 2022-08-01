@@ -1,0 +1,14 @@
+---
+source: cli/tests/main.rs
+expression: file
+input_file: cli/tests/files/json/json-property-key.json
+---
+|                                                                              | printWidth
+----------------------------------start input-----------------------------------
+{
+    "a": 123
+}
+
+-----------------------------------end input------------------------------------
+|                                                                              | printWidth
+
