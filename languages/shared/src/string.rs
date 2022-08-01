@@ -23,11 +23,11 @@ pub enum QuoteType {
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub struct StringOptions<'a> {
-    pub backslash_escaped_characters: &'a str,
-    pub allow_line_breaks: bool,
-    pub preferred_quote_type: Option<QuoteType>,
-    pub allow_unicode_4_digit_escape: bool,
-    pub allow_unicode_8_digit_escape: bool,
+    backslash_escaped_characters: &'a str,
+    allow_line_breaks: bool,
+    preferred_quote_type: Option<QuoteType>,
+    allow_unicode_4_digit_escape: bool,
+    allow_unicode_8_digit_escape: bool,
 }
 
 impl<'a> StringOptions<'a> {

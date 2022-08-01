@@ -11,13 +11,13 @@ use prettify::{
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub struct RepeatedItemsOptions<'a, F: FnMut(&'a str) -> nom::IResult<&'a str, PrettifyDoc<'a>>> {
-    pub open_delimiter: &'a str,
-    pub item_parser: F,
-    pub separator: &'a str,
-    pub close_delimiter: &'a str,
-    pub allow_trailing_separator: bool,
-    pub use_user_preferred_indentation: bool,
-    pub use_space_around_delimiters: bool,
+    open_delimiter: &'a str,
+    item_parser: F,
+    separator: &'a str,
+    close_delimiter: &'a str,
+    allow_trailing_separator: bool,
+    use_user_preferred_indentation: bool,
+    use_space_around_delimiters: bool,
 }
 
 impl<'a, F: FnMut(&'a str) -> nom::IResult<&'a str, PrettifyDoc<'a>>> RepeatedItemsOptions<'a, F> {
