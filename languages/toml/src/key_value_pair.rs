@@ -10,7 +10,7 @@ use nom::{
 use prettify::{concat, string, PrettifyDoc};
 use prettify_shared::{
     float, integer, rfc_3339_date, rfc_3339_date_time, rfc_3339_local_date_time,
-    rfc_3339_partial_time,
+    rfc_3339_partial_time, IntegerOptions,
 };
 
 #[derive(PartialEq, Debug, Clone)]
@@ -27,7 +27,13 @@ pub fn value(input: &str) -> nom::IResult<&str, PrettifyDoc> {
         rfc_3339_date,
         rfc_3339_partial_time,
         float,
-        integer,
+        integer(
+            IntegerOptions::new()
+                .use_underscores()
+                .parse_binary()
+                .parse_hex()
+                .parse_octal(),
+        ),
         toml_string,
     ))(input)
 }
