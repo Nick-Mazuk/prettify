@@ -114,7 +114,10 @@ fn decimal_integer<'a>(
             concat(vec![
                 sign,
                 string(if options.use_underscores {
-                    add_integer_underscores(value)
+                    match options.use_underscores_every_n {
+                        Some(n) => add_integer_underscores_every_n(value, n),
+                        None => add_integer_underscores(value),
+                    }
                 } else {
                     value.replace('_', "")
                 }),
@@ -295,5 +298,17 @@ mod test {
         assert_formatted(integer(options)("0x1234_5678"), ("", "0x12345678"));
         assert_formatted(integer(options)("0b101010_1010"), ("", "0b1010101010"));
         assert_formatted(integer(options)("0b1010101010"), ("", "0b1010101010"));
+    }
+
+    #[test]
+    fn custom_underscore_every_n() {
+        assert_formatted(
+            integer(IntegerOptions::new().use_underscores_every_n(4))("123456789"),
+            ("", "1_2345_6789"),
+        );
+        assert_formatted(
+            integer(IntegerOptions::new().use_underscores_every_n(2))("123456789"),
+            ("", "1_23_45_67_89"),
+        );
     }
 }
