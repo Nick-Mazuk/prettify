@@ -28,6 +28,7 @@ pub struct StringOptions<'a> {
     preferred_quote_type: Option<QuoteType>,
     allow_unicode_4_digit_escape: bool,
     allow_unicode_8_digit_escape: bool,
+    unicode_transform_lowercase: bool,
 }
 
 impl<'a> StringOptions<'a> {
@@ -38,6 +39,7 @@ impl<'a> StringOptions<'a> {
             preferred_quote_type: None,
             allow_unicode_4_digit_escape: false,
             allow_unicode_8_digit_escape: false,
+            unicode_transform_lowercase: false,
         }
     }
 
@@ -63,6 +65,11 @@ impl<'a> StringOptions<'a> {
 
     pub fn allow_unicode_8_digit_escape(mut self) -> Self {
         self.allow_unicode_8_digit_escape = true;
+        self
+    }
+
+    pub fn unicode_transform_lowercase(mut self) -> Self {
+        self.unicode_transform_lowercase = true;
         self
     }
 }
@@ -171,7 +178,11 @@ pub fn format_custom_quoted_string<'a>(
                     StringFragment::Unescaped(value) => prettify_string(value),
                     StringFragment::EscapedUnicode(value) => concat(vec![
                         prettify_string(if value.len() == 4 { "\\u" } else { "\\U" }),
-                        prettify_string(value),
+                        prettify_string(if options.unicode_transform_lowercase {
+                            value.to_lowercase()
+                        } else {
+                            value.to_uppercase()
+                        }),
                     ]),
                     StringFragment::Escaped(value) => {
                         if value == quote
@@ -712,6 +723,44 @@ mod test {
                 "\"\\\"\"",
             ),
             ("", "\"\\\"\""),
+        );
+    }
+
+    #[test]
+    fn format_unicode() {
+        assert_formatted(
+            parse_and_format_string(
+                StringOptions::new()
+                    .preferred_quote_type(QuoteType::Single)
+                    .allow_unicode_4_digit_escape(),
+            )("'\\uBeEf'"),
+            ("", "'\\uBEEF'"),
+        );
+        assert_formatted(
+            parse_and_format_string(
+                StringOptions::new()
+                    .preferred_quote_type(QuoteType::Single)
+                    .allow_unicode_4_digit_escape()
+                    .unicode_transform_lowercase(),
+            )("'\\uBeEf'"),
+            ("", "'\\ubeef'"),
+        );
+        assert_formatted(
+            parse_and_format_string(
+                StringOptions::new()
+                    .preferred_quote_type(QuoteType::Single)
+                    .allow_unicode_8_digit_escape(),
+            )("'\\UDeAdBeEf'"),
+            ("", "'\\UDEADBEEF'"),
+        );
+        assert_formatted(
+            parse_and_format_string(
+                StringOptions::new()
+                    .preferred_quote_type(QuoteType::Single)
+                    .allow_unicode_8_digit_escape()
+                    .unicode_transform_lowercase(),
+            )("'\\UDeAdBeEf'"),
+            ("", "'\\Udeadbeef'"),
         );
     }
 }
