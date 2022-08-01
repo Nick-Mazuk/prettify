@@ -11,7 +11,9 @@ use prettify_shared::{repeated_items, RepeatedItemsOptions};
 
 pub fn object(input: &str) -> nom::IResult<&str, PrettifyDoc> {
     repeated_items(
-        RepeatedItemsOptions::new("{", key_value_pair, ",", "}").use_user_preferred_indentation(),
+        RepeatedItemsOptions::new("{", key_value_pair, ",", "}")
+            .use_user_preferred_indentation()
+            .use_space_around_delimiters(),
     )(input)
 }
 
@@ -40,22 +42,25 @@ mod test {
     fn test_object() {
         assert_formatted(
             object("{\"hello\": \"world\"}"),
-            ("", "{\"hello\": \"world\"}"),
+            ("", "{ \"hello\": \"world\" }"),
         );
         assert_formatted(
             object("{'hello': \"world\"}"),
-            ("", "{\"hello\": \"world\"}"),
+            ("", "{ \"hello\": \"world\" }"),
         );
-        assert_formatted(object("{hello: \"world\"}"), ("", "{\"hello\": \"world\"}"));
-        assert_formatted(object("{\"\": \"world\"}"), ("", "{\"\": \"world\"}"));
-        assert_formatted(object("{'': \"world\"}"), ("", "{\"\": \"world\"}"));
+        assert_formatted(
+            object("{hello: \"world\"}"),
+            ("", "{ \"hello\": \"world\" }"),
+        );
+        assert_formatted(object("{\"\": \"world\"}"), ("", "{ \"\": \"world\" }"));
+        assert_formatted(object("{'': \"world\"}"), ("", "{ \"\": \"world\" }"));
         assert_formatted(
             object("{\n\"hello\"\n :\n\"world\"}"),
             ("", "{\n    \"hello\": \"world\"\n}"),
         );
         assert_formatted(
             object("{  hello world  : 42}"),
-            ("", "{\"hello world\": 42}"),
+            ("", "{ \"hello world\": 42 }"),
         );
         assert_formatted(
             object("{\"this is a long key\": 1234,\"this is a long key\": 1234,\"this is a long key\": 1234}"),
@@ -63,20 +68,20 @@ mod test {
         );
         assert_formatted(
             object("{\"hello\": {\"world\": 42}}"),
-            ("", "{\"hello\": {\"world\": 42}}"),
+            ("", "{ \"hello\": { \"world\": 42 } }"),
         );
         assert_formatted(
             object("{\"hello 1\": [\"world\", 42], \"hello 2\": {\"world\": 42}}"),
             (
                 "",
-                "{\"hello 1\": [\"world\", 42], \"hello 2\": {\"world\": 42}}",
+                "{ \"hello 1\": [\"world\", 42], \"hello 2\": { \"world\": 42 } }",
             ),
         );
         assert_formatted(
             object("{\n\"hello 1\": [\"world\", 42], \"hello 2\": {\"world\": 42}}"),
             (
                 "",
-                "{\n    \"hello 1\": [\"world\", 42],\n    \"hello 2\": {\"world\": 42}\n}",
+                "{\n    \"hello 1\": [\"world\", 42],\n    \"hello 2\": { \"world\": 42 }\n}",
             ),
         );
         assert_formatted(

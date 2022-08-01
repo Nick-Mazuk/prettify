@@ -76,6 +76,8 @@ pub fn repeated_items<'a, F: FnMut(&'a str) -> nom::IResult<&'a str, PrettifyDoc
         ),
         move |result| {
             let (initial_whitespace, items) = result;
+            let use_space_around_delimiters =
+                options.use_space_around_delimiters && items.len() > 0;
             group(concat(vec![
                 string(options.open_delimiter),
                 indent(concat(vec![
@@ -84,7 +86,7 @@ pub fn repeated_items<'a, F: FnMut(&'a str) -> nom::IResult<&'a str, PrettifyDoc
                     } else {
                         string("")
                     },
-                    if options.use_space_around_delimiters {
+                    if use_space_around_delimiters {
                         line()
                     } else {
                         soft_line()
@@ -96,7 +98,7 @@ pub fn repeated_items<'a, F: FnMut(&'a str) -> nom::IResult<&'a str, PrettifyDoc
                         string("")
                     },
                 ])),
-                if options.use_space_around_delimiters {
+                if use_space_around_delimiters {
                     line()
                 } else {
                     soft_line()
@@ -161,6 +163,13 @@ mod test {
                     .use_space_around_delimiters(),
             )("{hello,hello}"),
             ("", "{ hello, hello }"),
+        );
+        assert_formatted(
+            repeated_items(
+                RepeatedItemsOptions::new("{", map(tag("hello"), string), ",", "}")
+                    .use_space_around_delimiters(),
+            )("{}"),
+            ("", "{}"),
         );
         assert_formatted(
             repeated_items(RepeatedItemsOptions::new(
