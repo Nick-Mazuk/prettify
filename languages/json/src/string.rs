@@ -6,7 +6,7 @@ pub fn json_string(input: &str) -> nom::IResult<&str, PrettifyDoc> {
         StringOptions::new()
             .backslash_escaped_characters("bfnrt")
             .allow_unicode_4_digit_escape()
-            .preferred_quote_type(QuoteType::Double),
+            .force_quote_type(QuoteType::Double),
     )(input)
 }
 

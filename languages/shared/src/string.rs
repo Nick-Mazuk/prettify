@@ -25,7 +25,7 @@ pub enum QuoteType {
 pub struct StringOptions<'a> {
     backslash_escaped_characters: &'a str,
     allow_line_breaks: bool,
-    preferred_quote_type: Option<QuoteType>,
+    force_quote_type: Option<QuoteType>,
     allow_unicode_4_digit_escape: bool,
     allow_unicode_8_digit_escape: bool,
     unicode_transform_lowercase: bool,
@@ -36,7 +36,7 @@ impl<'a> StringOptions<'a> {
         StringOptions {
             backslash_escaped_characters: "",
             allow_line_breaks: false,
-            preferred_quote_type: None,
+            force_quote_type: None,
             allow_unicode_4_digit_escape: false,
             allow_unicode_8_digit_escape: false,
             unicode_transform_lowercase: false,
@@ -53,8 +53,8 @@ impl<'a> StringOptions<'a> {
         self
     }
 
-    pub fn preferred_quote_type(mut self, quote_type: QuoteType) -> Self {
-        self.preferred_quote_type = Some(quote_type);
+    pub fn force_quote_type(mut self, quote_type: QuoteType) -> Self {
+        self.force_quote_type = Some(quote_type);
         self
     }
 
@@ -265,7 +265,7 @@ pub fn format_string<'a>(
     fragments: Vec<StringFragment<'a>>,
     options: StringOptions<'a>,
 ) -> PrettifyDoc<'a> {
-    match options.preferred_quote_type {
+    match options.force_quote_type {
         Some(QuoteType::Single) => format_single_quoted_string(fragments, options),
         Some(QuoteType::Double) => format_double_quoted_string(fragments, options),
         None => {
@@ -713,13 +713,13 @@ mod test {
         assert_formatted(parse_and_format_string(options)("'\\\\'"), ("", "\"\\\\\""));
 
         assert_formatted(
-            parse_and_format_string(StringOptions::new().preferred_quote_type(QuoteType::Single))(
+            parse_and_format_string(StringOptions::new().force_quote_type(QuoteType::Single))(
                 "'\\\\'",
             ),
             ("", "'\\\\'"),
         );
         assert_formatted(
-            parse_and_format_string(StringOptions::new().preferred_quote_type(QuoteType::Double))(
+            parse_and_format_string(StringOptions::new().force_quote_type(QuoteType::Double))(
                 "\"\\\"\"",
             ),
             ("", "\"\\\"\""),
@@ -731,7 +731,7 @@ mod test {
         assert_formatted(
             parse_and_format_string(
                 StringOptions::new()
-                    .preferred_quote_type(QuoteType::Single)
+                    .force_quote_type(QuoteType::Single)
                     .allow_unicode_4_digit_escape(),
             )("'\\uBeEf'"),
             ("", "'\\uBEEF'"),
@@ -739,7 +739,7 @@ mod test {
         assert_formatted(
             parse_and_format_string(
                 StringOptions::new()
-                    .preferred_quote_type(QuoteType::Single)
+                    .force_quote_type(QuoteType::Single)
                     .allow_unicode_4_digit_escape()
                     .unicode_transform_lowercase(),
             )("'\\uBeEf'"),
@@ -748,7 +748,7 @@ mod test {
         assert_formatted(
             parse_and_format_string(
                 StringOptions::new()
-                    .preferred_quote_type(QuoteType::Single)
+                    .force_quote_type(QuoteType::Single)
                     .allow_unicode_8_digit_escape(),
             )("'\\UDeAdBeEf'"),
             ("", "'\\UDEADBEEF'"),
@@ -756,7 +756,7 @@ mod test {
         assert_formatted(
             parse_and_format_string(
                 StringOptions::new()
-                    .preferred_quote_type(QuoteType::Single)
+                    .force_quote_type(QuoteType::Single)
                     .allow_unicode_8_digit_escape()
                     .unicode_transform_lowercase(),
             )("'\\UDeAdBeEf'"),
